@@ -43,8 +43,6 @@ flowchart TD
 
 ## Getting started
 
-test22
-
 ### Using devspace
 
 ```bash
