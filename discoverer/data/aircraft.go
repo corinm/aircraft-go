@@ -12,6 +12,4 @@ type AircraftEnriched struct {
 	AircraftType     string // e.g. "Boeing 737-800"
 	RegisteredOwners string // e.g. "easyJet UK"
 	IcaoAirlineCode  string // e.g. "EZY"
-	IsMilitary       bool
-	IsInteresting    bool
 }

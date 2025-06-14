@@ -103,7 +103,3 @@ func (m MetadataFetcher) GetIcaoAirlineCodeByHex(hex string) (string, error) {
 
 	return r.OperatorFlagCode, nil
 }
-
-// func (m MetadataFetcher) IsMilitaryByHex(hex string) (bool, error) {}
-
-// func (m MetadataFetcher) IsInterestingByHex(hex string) (bool, error) {}

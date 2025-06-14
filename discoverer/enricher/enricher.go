@@ -13,8 +13,6 @@ func EnrichAircraft(aircraft data.Aircraft) (data.AircraftEnriched, error) {
 	aircraftType, _ := metdataFetcher.GetAircraftTypeByHex(aircraft.AiocHexCode)
 	registeredOwners, _ := metdataFetcher.GetRegisteredOwnersByHex(aircraft.AiocHexCode)
 	icaoAirlineCode, _ := metdataFetcher.GetIcaoAirlineCodeByHex(aircraft.AiocHexCode)
-	// isMilitary, _ := metdataFetcher.IsMilitaryByHex(aircraft.AiocHexCode)
-	// isInteresting, _ := metdataFetcher.IsInterestingByHex(aircraft.AiocHexCode)
 
 	enrichedAircraft := data.AircraftEnriched{
 		AiocHexCode:      aircraft.AiocHexCode,
@@ -24,8 +22,6 @@ func EnrichAircraft(aircraft data.Aircraft) (data.AircraftEnriched, error) {
 		AircraftType:     aircraftType,
 		RegisteredOwners: registeredOwners,
 		IcaoAirlineCode:  icaoAirlineCode,
-		// IsMilitary:    isMilitary,
-		// IsInteresting: isInteresting,
 	}
 
 	return enrichedAircraft, nil
