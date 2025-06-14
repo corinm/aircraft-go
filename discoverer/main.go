@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/corinm/aircraft/discovery/enricher"
 	"github.com/corinm/aircraft/discovery/fetcher"
 	"github.com/joho/godotenv"
 )
@@ -31,10 +32,15 @@ func main() {
 
 	log.Println("Fetching aircraft data...")
 
-	_, err2 := f.FetchAircraft()
+	aircraft, err2 := f.FetchAircraft()
 	if err2 != nil {
 		log.Println("Error fetching aircraft:", err2)
 		return
+	}
+
+	for _, a := range aircraft {
+		a2, _ := enricher.EnrichAircraft(a)
+		log.Printf("Enriched Aircraft: %+v\n", a2)
 	}
 
 	log.Println("Discoverer finished")

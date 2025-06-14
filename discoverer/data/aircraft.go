@@ -5,10 +5,13 @@ type Aircraft struct {
 }
 
 type AircraftEnriched struct {
-	AiocHexCode string
-	Manufacturer string
-	ICAOTypeCode string // e.g. "B738", "A320" etc.
-	AircraftType  string // e.g. "Boeing 737-800", "Airbus A320" etc.
-	Operator	 string
-	PlaneAlertDbTags []string // e.g. "Police Squad", "Military Transport" etc.
+	AiocHexCode      string
+	Registration	 string // e.g. "G-EZBZ"
+	Manufacturer     string // e.g. "Boeing"
+	ICAOTypeCode     string // e.g. "B738"
+	AircraftType     string // e.g. "Boeing 737-800"
+	RegisteredOwners string // e.g. "easyJet UK"
+	IcaoAirlineCode  string // e.g. "EZY"
+	IsMilitary       bool
+	IsInteresting    bool
 }
