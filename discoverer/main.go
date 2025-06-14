@@ -23,6 +23,12 @@ func main() {
 		panic("TAR1090_URL not set")
 	}
 
+	hexDbUrl := os.Getenv("HEXDB_URL")
+	if hexDbUrl == "" {
+		log.Fatal("HEXDB_URL environment variable is not set")
+		panic("HEXDB_URL not set")
+	}
+
 	f := fetcher.Tar1090AdsbFetcher{
 		URL: tar1090Url,
 	}
@@ -40,7 +46,7 @@ func main() {
 	log.Printf("Found %d aircraft\n", len(aircraft))
 
 	enrichers := []pipeline.Enricher{
-		&pipeline.HexDbEnricher{HexDbUrl: "https://hexdb.io/api/v1/aircraft/"},
+		&pipeline.HexDbEnricher{HexDbUrl: hexDbUrl},
 	}
 
 	for _, a := range aircraft {
