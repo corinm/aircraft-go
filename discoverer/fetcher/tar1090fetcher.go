@@ -3,8 +3,8 @@ package fetcher
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/corinm/aircraft/discovery/data"
@@ -79,7 +79,7 @@ func (f Tar1090AdsbFetcher) FetchAircraft() ([]data.Aircraft, error) {
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("HTTP GET request to tar1090 API completed with status:", resp.Status)
+	log.Println("HTTP GET request to tar1090 API completed with status:", resp.Status)
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New("failed to fetch tar1090 data, resp.Status: " + resp.Status)
@@ -102,7 +102,7 @@ func (f Tar1090AdsbFetcher) FetchAircraft() ([]data.Aircraft, error) {
 		aircraft = append(aircraft, transformTar1090AircraftToAircraft(a))
 	}
 
-	fmt.Println("Processed", len(d.Aircraft), "aircraft from tar1090 response")
+	log.Println("Processed", len(d.Aircraft), "aircraft from tar1090 response")
 
 	return aircraft, nil
 }
