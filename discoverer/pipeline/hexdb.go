@@ -61,5 +61,6 @@ func (e *HexDbEnricher) Enrich(a *data.Aircraft) error {
 	a.AircraftType = resp.Type
 	a.RegisteredOwners = resp.RegisteredOwners
 	a.IcaoAirlineCode = resp.OperatorFlagCode
+
 	return nil
 }
