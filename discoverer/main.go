@@ -12,9 +12,8 @@ import (
 func main() {
 	log.Println("Discoverer starting...")
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Failed to load .env file")
 		panic("Error loading .env file")
 	}
 
@@ -37,6 +36,8 @@ func main() {
 		log.Println("Error fetching aircraft:", err2)
 		return
 	}
+
+	log.Printf("Found %d aircraft\n", len(aircraft))
 
 	for _, a := range aircraft {
 		a2, _ := enricher.EnrichAircraft(a)
