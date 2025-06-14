@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/corinm/aircraft/discovery/enricher"
 	"github.com/corinm/aircraft/discovery/fetcher"
+	"github.com/corinm/aircraft/discovery/pipeline"
 	"github.com/joho/godotenv"
 )
 
@@ -39,9 +39,13 @@ func main() {
 
 	log.Printf("Found %d aircraft\n", len(aircraft))
 
+	enrichers := []pipeline.Enricher{
+		&pipeline.HexDbEnricher{HexDbUrl: "https://hexdb.io/api/v1/aircraft/"},
+	}
+
 	for _, a := range aircraft {
-		a2, _ := enricher.EnrichAircraft(a)
-		log.Printf("Enriched Aircraft: %+v\n", a2)
+		pipeline.EnrichAircraft(&a, enrichers)
+		log.Printf("Enriched Aircraft: %+v\n", a)
 	}
 
 	log.Println("Discoverer finished")

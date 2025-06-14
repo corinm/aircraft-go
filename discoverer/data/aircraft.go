@@ -1,11 +1,7 @@
 package data
 
 type Aircraft struct {
-	AiocHexCode string
-}
-
-type AircraftEnriched struct {
-	AiocHexCode      string
+	AiocHexCode      string // e.g. "4CA293"
 	Registration	 string // e.g. "G-EZBZ"
 	Manufacturer     string // e.g. "Boeing"
 	ICAOTypeCode     string // e.g. "B738"
