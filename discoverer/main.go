@@ -6,7 +6,7 @@ import (
 
 	"github.com/corinm/aircraft/discovery/fetcher"
 	"github.com/corinm/aircraft/discovery/pipeline"
-	"github.com/joho/godotenv"
+	"github.com/lpernett/godotenv"
 )
 
 func main() {
