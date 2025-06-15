@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"github.com/corinm/aircraft/discovery/fetcher"
+	"github.com/corinm/aircraft/discovery/messaging"
 	"github.com/corinm/aircraft/discovery/pipeline"
 	"github.com/lpernett/godotenv"
-	"github.com/nats-io/nats.go"
 )
 
 func main() {
@@ -66,18 +66,19 @@ func main() {
 
 	log.Printf("Connecting to NATS at %s\n", natsUrl)
 
-	nc, err3 := nats.Connect(natsUrl)
+	m, err3 := messaging.NewNatsMessaging(natsUrl)
 	if err3 != nil {
-		log.Println("Error connecting to NATS:", err3)
+		log.Fatal("Error creating messaging client:", err3)
 		return
 	}
-	defer nc.Close()
+
+	defer m.Close()
 	log.Println("Connected to NATS")
 
 	for _, a := range aircraft {
 		pipeline.EnrichAircraft(&a, enrichers)
 		log.Printf("Enriched Aircraft: %+v\n", a)
-		err4 := nc.Publish("aircraft", []byte(a.AiocHexCode))
+		err4 := m.Publish("aircraft", []byte(a.AiocHexCode))
 		if err4 != nil {
 			log.Println("Error publishing aircraft:", err3)
 		}
