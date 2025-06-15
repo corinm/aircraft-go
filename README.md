@@ -45,7 +45,16 @@ flowchart TD
 
 ### Using devspace
 
+Install NATS
+
 ```bash
+helm repo add nats https://nats-io.github.io/k8s/helm/charts/
+helm repo update
+helm install my-nats nats/nats
+```
+
+```bash
+cd discoverer
 devspace dev
 ```
 
