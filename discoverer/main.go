@@ -7,6 +7,7 @@ import (
 	"github.com/corinm/aircraft/discovery/fetcher"
 	"github.com/corinm/aircraft/discovery/pipeline"
 	"github.com/lpernett/godotenv"
+	"github.com/nats-io/nats.go"
 )
 
 func main() {
@@ -29,6 +30,20 @@ func main() {
 		panic("HEXDB_URL not set")
 	}
 
+	natsHost := os.Getenv("DISCOVERY_NATS_HOST")
+	if natsHost == "" {
+		log.Fatal("DISCOVERY_NATS_HOST environment variable is not set")
+		panic("DISCOVERY_NATS_HOST not set")
+	}
+	
+	natsPort := os.Getenv("DISCOVERY_NATS_PORT")
+	if natsPort == "" {
+		log.Fatal("DISCOVERY_NATS_PORT environment variable is not set")
+		panic("DISCOVERY_NATS_PORT not set")
+	}
+
+	natsUrl := natsHost + ":" + natsPort
+
 	f := fetcher.Tar1090AdsbFetcher{
 		URL: tar1090Url,
 	}
@@ -49,9 +64,23 @@ func main() {
 		&pipeline.HexDbEnricher{HexDbUrl: hexDbUrl},
 	}
 
+	log.Printf("Connecting to NATS at %s\n", natsUrl)
+
+	nc, err3 := nats.Connect(natsUrl)
+	if err3 != nil {
+		log.Println("Error connecting to NATS:", err3)
+		return
+	}
+	defer nc.Close()
+	log.Println("Connected to NATS")
+
 	for _, a := range aircraft {
 		pipeline.EnrichAircraft(&a, enrichers)
 		log.Printf("Enriched Aircraft: %+v\n", a)
+		err4 := nc.Publish("aircraft", []byte(a.AiocHexCode))
+		if err4 != nil {
+			log.Println("Error publishing aircraft:", err3)
+		}
 	}
 
 	log.Println("Discoverer finished")
