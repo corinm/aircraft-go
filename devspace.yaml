@@ -1,0 +1,10 @@
+version: v2beta1
+name: aircraft
+
+dependencies:
+  aircraft-discoverer:
+    path: discoverer
+    pipeline: dev
+  aircraft-enricher:
+    path: enricher
+    pipeline: dev
