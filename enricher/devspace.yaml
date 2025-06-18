@@ -9,7 +9,7 @@ pipelines:
       run_dependencies --all       # 1. Deploy any projects this project needs (see "dependencies")
       ensure_pull_secrets --all    # 2. Ensure pull secrets
       create_deployments --all     # 3. Deploy Helm charts and manifests specfied as "deployments"
-      start_dev app                # 4. Start dev mode "app" (see "dev" section)
+      start_dev aircraft-enricher                # 4. Start dev mode "app" (see "dev" section)
   # You can run this pipeline via `devspace deploy` (or `devspace run-pipeline deploy`)
   deploy:
     run: |-
@@ -21,13 +21,13 @@ pipelines:
 # This is a list of `images` that DevSpace can build for this project
 # We recommend to skip image building during development (devspace dev) as much as possible
 images:
-  app:
+  aircraft-enricher:
     image: aircraft-enricher
     dockerfile: ./Dockerfile
 
 # This is a list of `deployments` that DevSpace can create for this project
 deployments:
-  app:
+  aircraft-enricher:
     # This deployment uses `helm` but you can also define `kubectl` deployments or kustomizations
     helm:
       # We are deploying this project with the Helm chart you provided
@@ -42,7 +42,7 @@ deployments:
 
 # This is a list of `dev` containers that are based on the containers created by your deployments
 dev:
-  app:
+  aircraft-enricher:
     # Search for the container that runs this image
     imageSelector: aircraft-enricher
     # Replace the container image with this dev-optimized image (allows to skip image building during development)
@@ -74,7 +74,9 @@ commands:
       echo 'Anyone using this project can invoke it via "devspace run migrate-db"'
 
 # Define dependencies to other projects with a devspace.yaml
-# dependencies:
+dependencies:
+  aircraft-discoverer:
+    path: ../discoverer
 #   api:
 #     git: https://...  # Git-based dependencies
 #     tag: v1.0.0
