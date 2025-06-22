@@ -3,10 +3,10 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/corinm/aircraft/discovery/fetcher"
 	"github.com/corinm/aircraft/discovery/messaging"
-	"github.com/corinm/aircraft/discovery/pipeline"
 	"github.com/lpernett/godotenv"
 )
 
@@ -48,41 +48,48 @@ func main() {
 		URL: tar1090Url,
 	}
 
-	// TODO: Do this next bit in a loop
+	log.Printf("Connecting to NATS at %s...\n", natsUrl)
+	m, err := messaging.NewNatsMessaging(natsUrl)
+	if err != nil {
+		log.Fatal("Error creating messaging client:", err)
+		return
+	}
+	defer m.Close()
+	log.Println("Connected to NATS")
 
+	ticker := time.NewTicker(30 * time.Second)
+	defer ticker.Stop()
+
+	done := make(chan bool)
+
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				fetchAndPublishAircraft(f, m)
+			case <-done:
+				log.Println("Stopping fetcher...")
+				return
+			}
+		}
+	}()
+}
+
+func fetchAndPublishAircraft(f fetcher.Tar1090AdsbFetcher, m *messaging.NatsMessaging) {
 	log.Println("Fetching aircraft data...")
 
-	aircraft, err2 := f.FetchAircraft()
-	if err2 != nil {
-		log.Println("Error fetching aircraft:", err2)
+	aircraft, err := f.FetchAircraft()
+	if err != nil {
+		log.Println("Error fetching aircraft:", err)
 		return
 	}
 
 	log.Printf("Found %d aircraft\n", len(aircraft))
 
-	enrichers := []pipeline.Enricher{
-		&pipeline.HexDbEnricher{HexDbUrl: hexDbUrl},
-	}
-
-	log.Printf("Connecting to NATS at %s\n", natsUrl)
-
-	m, err3 := messaging.NewNatsMessaging(natsUrl)
-	if err3 != nil {
-		log.Fatal("Error creating messaging client:", err3)
-		return
-	}
-
-	defer m.Close()
-	log.Println("Connected to NATS")
-
 	for _, a := range aircraft {
-		pipeline.EnrichAircraft(&a, enrichers)
-		log.Printf("Enriched Aircraft: %+v\n", a)
-		err4 := m.Publish("aircraft", []byte(a.AiocHexCode))
-		if err4 != nil {
-			log.Println("Error publishing aircraft:", err3)
+		err := m.Publish("aircraft", []byte(a.AiocHexCode))
+		if err != nil {
+			log.Println("Error publishing aircraft:", err)
 		}
 	}
-
-	log.Println("Discoverer finished")
 }
