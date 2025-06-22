@@ -45,6 +45,7 @@ func main() {
 
 	m.Subscribe("aircraft", func(msg *nats.Msg) {
 		log.Println("Received message on subject:", msg.Data)
+		// Process message, enrich airfract, republish to enriched subject
 	})
 
 	// Catch interrupt signal to gracefully shutdown
