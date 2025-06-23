@@ -67,7 +67,7 @@ func main() {
 		}
 		log.Println("Enriched aircraft successfully, republishing...")
 
-		// Marshall aircraft to JSON
+		// Marshal aircraft to JSON
 		aircraftData, err := json.Marshal(aircraft)
 		if err != nil {
 			log.Println("Error marshalling enriched aircraft to JSON:", err)
