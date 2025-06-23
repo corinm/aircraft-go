@@ -11,35 +11,7 @@ Combines local ADS-B data with other data sources and notifies about interesting
 
 ### Diagram
 
-```mermaid
-flowchart TD
-    subgraph NATS["NATS Message Bus"]
-        DMessage["'aircraft' subject"]
-    end
-
-    Readsb["readsb/tar1090"]
-    Discovery["`**Discovery Service**`"]
-    Notifier["`**Notifier Service**
-    Identifies new and interesting aircraft`"]
-    Historian["`**Historian Service**
-    Keeps track of all aircraft ever seen`"]
-    Pushover["Pushover"]
-    MongoDB["MongoDB"]
-    Stats["`**Stats Service**`"]
-    User["`**User**`"]
-
-    Discovery -->|Polls for currently visible aircraft| Readsb
-    Discovery -->|Publishes visible aircraft to| DMessage
-    DMessage -->|Forwarded on to| Notifier
-    DMessage -->|Forwarded on to| Historian
-
-    Notifier -->|Uses HTTP API to send Push Notifications| Pushover
-    Historian -->|Stores all seen aircraft in| MongoDB
-
-    User -->|Uses HTTP API| Stats
-    Stats -->|Queries| MongoDB
-
-```
+![C4 Model-style "Container" diagram](docs/Aircraft-Excalidraw-2025-06-23-1933.svg)
 
 ## Getting started
 
