@@ -24,12 +24,6 @@ func main() {
 		panic("TAR1090_URL not set")
 	}
 
-	hexDbUrl := os.Getenv("HEXDB_URL")
-	if hexDbUrl == "" {
-		log.Fatal("HEXDB_URL environment variable is not set")
-		panic("HEXDB_URL not set")
-	}
-
 	natsHost := os.Getenv("DISCOVERY_NATS_HOST")
 	if natsHost == "" {
 		log.Fatal("DISCOVERY_NATS_HOST environment variable is not set")
@@ -73,6 +67,8 @@ func main() {
 			}
 		}
 	}()
+
+	select {}
 }
 
 func fetchAndPublishAircraft(f fetcher.Tar1090AdsbFetcher, m *messaging.NatsMessaging) {
@@ -87,7 +83,7 @@ func fetchAndPublishAircraft(f fetcher.Tar1090AdsbFetcher, m *messaging.NatsMess
 	log.Printf("Found %d aircraft\n", len(aircraft))
 
 	for _, a := range aircraft {
-		err := m.Publish("aircraft", []byte(a.AiocHexCode))
+		err := m.Publish("aircraft.raw", []byte(a.AiocHexCode))
 		if err != nil {
 			log.Println("Error publishing aircraft:", err)
 		}
