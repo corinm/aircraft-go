@@ -71,7 +71,7 @@ type Tar1090AdsbFetcher struct {
 	URL string
 }
 
-func (f Tar1090AdsbFetcher) FetchAircraft() ([]data.Aircraft, error) {
+func (f Tar1090AdsbFetcher) FetchAircraft() ([]data.RawAircraft, error) {
 	resp, err := http.Get(f.URL)
 	if err != nil {
 		return nil, err
@@ -93,7 +93,7 @@ func (f Tar1090AdsbFetcher) FetchAircraft() ([]data.Aircraft, error) {
 		return nil, err
 	}
 
-	aircraft := []data.Aircraft{}
+	aircraft := []data.RawAircraft{}
 
 	for _, a := range d.Aircraft {
 		aircraft = append(aircraft, transformTar1090AircraftToAircraft(a))
@@ -102,8 +102,6 @@ func (f Tar1090AdsbFetcher) FetchAircraft() ([]data.Aircraft, error) {
 	return aircraft, nil
 }
 
-func transformTar1090AircraftToAircraft(a tar1090response_aircraft) data.Aircraft {
-	return data.Aircraft{
-		AiocHexCode: a.Hex,
-	}
+func transformTar1090AircraftToAircraft(a tar1090response_aircraft) data.RawAircraft {
+	return data.RawAircraft{ AiocHexCode: a.Hex }
 }

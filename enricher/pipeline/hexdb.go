@@ -2,11 +2,10 @@ package pipeline
 
 import (
 	"encoding/json"
+	"enricher/data"
 	"errors"
 	"io"
 	"net/http"
-
-	"github.com/corinm/aircraft/discovery/data"
 )
 
 type HexDbEnricher struct {
@@ -49,7 +48,7 @@ func hexDbGetAircraftInformation(hex string) (*hexDbResponse, error) {
 	return &response, nil
 }
 
-func (e *HexDbEnricher) Enrich(a *data.Aircraft) error {
+func (e *HexDbEnricher) Enrich(a *data.EnrichedAircraft) error {
 	resp, err := hexDbGetAircraftInformation(a.AiocHexCode)
 	if err != nil {
 		return err

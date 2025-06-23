@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/json"
+	"enricher/data"
 	"enricher/messaging"
+	"enricher/pipeline"
 	"fmt"
 	"log"
 	"os"
@@ -34,18 +37,48 @@ func main() {
 
 	natsUrl := natsHost + ":" + natsPort
 
-	m, err3 := messaging.NewNatsMessaging(natsUrl)
-	if err3 != nil {
-		log.Fatal("Error creating messaging client:", err3)
-		return
+	hexDbUrl := os.Getenv("HEXDB_URL")
+	if hexDbUrl == "" {
+		log.Fatal("HEXDB_URL environment variable is not set")
+		panic("HEXDB_URL not set")
 	}
 
+	m, err := messaging.NewNatsMessaging(natsUrl)
+	if err != nil {
+		log.Fatal("Error creating messaging client:", err)
+		return
+	}
 	defer m.Close()
 	log.Println("Connected to NATS")
+	
+	enrichers := []pipeline.Enricher{
+		&pipeline.HexDbEnricher{HexDbUrl: hexDbUrl},
+	}
 
-	m.Subscribe("aircraft", func(msg *nats.Msg) {
-		log.Println("Received message on subject:", msg.Data)
-		// Process message, enrich airfract, republish to enriched subject
+	m.Subscribe("aircraft.raw", func(msg *nats.Msg) {
+		log.Println("Received message on subject:", msg.Subject)
+		// Process message, enrich aircraft, republish to enriched subject
+		aircraft := &data.EnrichedAircraft{AiocHexCode: string(msg.Data)}
+
+		err := pipeline.EnrichAircraft(aircraft, enrichers)
+		if err != nil {
+			log.Println("Error enriching aircraft:", err)
+			return
+		}
+		log.Println("Enriched aircraft successfully, republishing...")
+
+		// Marshall aircraft to JSON
+		aircraftData, err := json.Marshal(aircraft)
+		if err != nil {
+			log.Println("Error marshalling enriched aircraft to JSON:", err)
+			return
+		}
+
+		if err := m.Publish("aircraft.enriched", aircraftData); err != nil {
+			log.Println("Error republishing enriched aircraft:", err)
+			return
+		}
+		log.Println("Enriched aircraft republished successfully")
 	})
 
 	// Catch interrupt signal to gracefully shutdown
