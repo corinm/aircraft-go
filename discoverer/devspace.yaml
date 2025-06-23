@@ -77,6 +77,6 @@ commands:
       echo 'Anyone using this project can invoke it via "devspace run migrate-db"'
 
 # Define dependencies to other projects with a devspace.yaml
-# dependencies:
-#   aircraft-enricher:
-#     path: ../enricher
+dependencies:
+  aircraft-enricher:
+    path: ../enricher
