@@ -6,40 +6,12 @@ Combines local ADS-B data with other data sources and notifies about interesting
 
 ### Key features
 
-- Triggers Push Notifications when interesting aircraft are spotted by tar1090
+- In progress: Triggers Push Notifications when interesting aircraft are spotted by tar1090
 - Keeps track of all seen aircraft
 
 ### Diagram
 
-```mermaid
-flowchart TD
-    subgraph NATS["NATS Message Bus"]
-        DMessage["'aircraft' subject"]
-    end
-
-    Readsb["readsb/tar1090"]
-    Discovery["`**Discovery Service**`"]
-    Notifier["`**Notifier Service**
-    Identifies new and interesting aircraft`"]
-    Historian["`**Historian Service**
-    Keeps track of all aircraft ever seen`"]
-    Pushover["Pushover"]
-    MongoDB["MongoDB"]
-    Stats["`**Stats Service**`"]
-    User["`**User**`"]
-
-    Discovery -->|Polls for currently visible aircraft| Readsb
-    Discovery -->|Publishes visible aircraft to| DMessage
-    DMessage -->|Forwarded on to| Notifier
-    DMessage -->|Forwarded on to| Historian
-
-    Notifier -->|Uses HTTP API to send Push Notifications| Pushover
-    Historian -->|Stores all seen aircraft in| MongoDB
-
-    User -->|Uses HTTP API| Stats
-    Stats -->|Queries| MongoDB
-
-```
+![C4 Model-style "Container" diagram](docs/Aircraft-Excalidraw-2025-06-23-1933.svg)
 
 ## Getting started
 
@@ -53,9 +25,20 @@ helm repo update
 helm install my-nats nats/nats
 ```
 
+Start desired service using dev:
+
 ```bash
 cd discoverer
 devspace dev
+```
+
+For other services:
+
+```bash
+devspace enter
+# Select the service in the menu
+# Wait for a shell
+go run main.go
 ```
 
 ## TODO list
@@ -69,5 +52,7 @@ devspace dev
   - [ ] Investigate any other potential data sources
 - [ ] Implement `evaluator` service
   - [ ] Implement logic to identify interesting aircraft
-- [ ] Re-implement `notifier` service in Go
+- [ ] Implement `notifier` service
   - [ ] Publish notifications using Pushover
+- [ ] Add `historian` service
+- [ ] Add `stats` service
