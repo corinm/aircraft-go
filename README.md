@@ -60,8 +60,14 @@ devspace dev
 
 ## TODO list
 
-- [ ] Re-implement`discoverer` service using Go
-  - [ ] Figure out best approach for enriching data
-  - [ ] Include data about whether aircraft is interesting
-- [ ] Re-add NATS
-- [ ] Re-implement `notifier` service using Go
+- [x] Re-implement`discoverer` service using Go
+  - [x] Publish aircraft when found
+- [x] Re-add NATS
+- [ ] Implement `enricher` service
+  - [x] Enrich with HexDB data
+  - [ ] Enrich with PlaneAlertDb data (i.e. whether it's an interesting aircraft and why)
+  - [ ] Investigate any other potential data sources
+- [ ] Implement `evaluator` service
+  - [ ] Implement logic to identify interesting aircraft
+- [ ] Re-implement `notifier` service in Go
+  - [ ] Publish notifications using Pushover
