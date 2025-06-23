@@ -43,6 +43,7 @@ func main() {
 		panic("HEXDB_URL not set")
 	}
 
+	log.Printf("Connecting to NATS at %s...\n", natsUrl)
 	m, err := messaging.NewNatsMessaging(natsUrl)
 	if err != nil {
 		log.Fatal("Error creating messaging client:", err)
