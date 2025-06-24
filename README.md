@@ -11,7 +11,7 @@ Combines local ADS-B data with other data sources and notifies about interesting
 
 ### Diagram
 
-![C4 Model-style "Container" diagram](docs/Aircraft-Excalidraw-2025-06-23-1933.svg)
+![C4 Model-style "Container" diagram](docs/Aircraft-Excalidraw-2025-06-24-0942.svg)
 
 ## Getting started
 
