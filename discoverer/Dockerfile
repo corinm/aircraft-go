@@ -7,6 +7,6 @@ RUN go mod download
 
 COPY . ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /discoverer
+RUN CGO_ENABLED=0 GOOS=linux go build -o ./discoverer
 
-CMD [ "discoverer" ]
+CMD [ "./discoverer" ]

@@ -8,3 +8,9 @@ dependencies:
   aircraft-enricher:
     path: enricher
     pipeline: dev
+  aircraft-evaluator:
+    path: evaluator
+    pipeline: dev
+  aircraft-notifier:
+    path: notifier
+    pipeline: dev
