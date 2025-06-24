@@ -7,6 +7,6 @@ RUN go mod download
 
 COPY . ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /enricher
+RUN CGO_ENABLED=0 GOOS=linux go build -o ./enricher
 
-CMD [ "enricher" ]
+CMD [ "./enricher" ]
