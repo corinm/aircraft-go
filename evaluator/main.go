@@ -68,7 +68,8 @@ func main() {
 		}
 
 		log.Printf("Aircraft %s meets criteria, sending notification...\n", aircraft.AiocHexCode)
-		if err := m.Publish("aircraft.notify", msg.Data); err != nil {
+		// Print the response if you want
+		if err := m.Publish("aircraft.interesting", msg.Data); err != nil {
 			log.Println("Error republishing enriched aircraft:", err)
 		}
 	})

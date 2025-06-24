@@ -61,7 +61,7 @@ func main() {
 	p := pushover.New(pushoverAppToken)
 	recipient := pushover.NewRecipient(pushoverUserKey)
 
-	m.Subscribe("aircraft.notify", func(msg *nats.Msg) {
+	m.Subscribe("aircraft.interesting", func(msg *nats.Msg) {
 		log.Println("Received message on subject:", msg.Subject)
 
 		aircraft := data.EnrichedAircraft{}
