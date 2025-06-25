@@ -1,12 +1,12 @@
 # Aircraft
 
-Combines local ADS-B data with other data sources and notifies about interesting aircraft
+Combines local ADS-B data with other data sources and notifies about interesting aircraft.
 
 ## Overview
 
 ### Key features
 
-- In progress: Triggers Push Notifications when interesting aircraft are spotted by tar1090
+- Triggers Push Notifications when interesting aircraft are spotted by tar1090
 - Keeps track of all seen aircraft
 
 ### Diagram
@@ -15,9 +15,9 @@ Combines local ADS-B data with other data sources and notifies about interesting
 
 ## Getting started
 
-### Using devspace
+### Using `devspace`
 
-Install NATS
+#### Install NATS
 
 ```bash
 helm repo add nats https://nats-io.github.io/k8s/helm/charts/
@@ -25,19 +25,13 @@ helm repo update
 helm install my-nats nats/nats
 ```
 
-Start desired service using dev:
+#### To develop a service:
+
+The target service will start in `dev` mode and dependent services will be deployed alongside it in `deploy` mode:
 
 ```bash
-cd discoverer
+cd notifier
 devspace dev
-```
-
-For other services:
-
-```bash
-devspace enter
-# Select the service in the menu
-# Wait for a shell
 go run main.go
 ```
 
@@ -52,7 +46,7 @@ go run main.go
   - [ ] Investigate any other potential data sources
 - [ ] Implement `evaluator` service
   - [ ] Implement logic to identify interesting aircraft
-- [ ] Implement `notifier` service
-  - [ ] Publish notifications using Pushover
+- [x] Implement `notifier` service
+  - [x] Publish notifications using Pushover
 - [ ] Add `historian` service
 - [ ] Add `stats` service
