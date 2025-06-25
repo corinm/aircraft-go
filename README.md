@@ -46,7 +46,7 @@ go run main.go
   - [ ] Investigate any other potential data sources
 - [ ] Implement `evaluator` service
   - [ ] Implement logic to identify interesting aircraft
-- [ ] Implement `notifier` service
-  - [ ] Publish notifications using Pushover
+- [x] Implement `notifier` service
+  - [x] Publish notifications using Pushover
 - [ ] Add `historian` service
 - [ ] Add `stats` service
