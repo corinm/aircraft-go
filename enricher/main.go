@@ -34,34 +34,35 @@ func main() {
 	}
 	defer m.Close()
 	log.Println("Connected to NATS")
-	
+
 	enrichers := []pipeline.Enricher{
 		&pipeline.HexDbEnricher{HexDbUrl: config.HexDbUrl},
 	}
 
+	p := pipeline.Pipeline{Enrichers: enrichers}
+
 	m.Subscribe("aircraft.raw", func(msg *nats.Msg) {
 		log.Println("Received message on subject:", msg.Subject)
-		// Process message, enrich aircraft, republish to enriched subject
+
 		aircraft := &data.EnrichedAircraft{AiocHexCode: string(msg.Data)}
 
-		if err := pipeline.EnrichAircraft(aircraft, enrichers); err != nil {
+		if err := p.Enrich(aircraft); err != nil {
 			log.Println("Error enriching aircraft:", err)
 			return
 		}
-		log.Println("Enriched aircraft successfully, republishing...")
 
-		// Marshal aircraft to JSON
 		aircraftData, err := json.Marshal(aircraft)
 		if err != nil {
-			log.Println("Error marshalling enriched aircraft to JSON:", err)
+			log.Println("Error marshalling aircraft to JSON:", err)
 			return
 		}
 
 		if err := m.Publish("aircraft.enriched", aircraftData); err != nil {
-			log.Println("Error republishing enriched aircraft:", err)
+			log.Println("Error publishing aircraft:", err)
 			return
 		}
-		log.Println("Enriched aircraft republished successfully")
+
+		log.Println("Aircraft handled successfully:", aircraft.AiocHexCode)
 	})
 
 	// Catch interrupt signal to gracefully shutdown
