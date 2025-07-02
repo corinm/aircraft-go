@@ -49,5 +49,6 @@ go run main.go
   - [ ] Implement logic to identify interesting aircraft
 - [x] Implement `notifier` service
   - [x] Publish notifications using Pushover
+- [ ] Try out https://github.com/caarlos0/env
 - [ ] Add `historian` service
 - [ ] Add `stats` service
