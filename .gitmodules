@@ -1,0 +1,3 @@
+[submodule "enricher/lib/plane-alert-db"]
+	path = enricher/lib/plane-alert-db
+	url = https://github.com/sdr-enthusiasts/plane-alert-db.git
