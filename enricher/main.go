@@ -44,8 +44,7 @@ func main() {
 		// Process message, enrich aircraft, republish to enriched subject
 		aircraft := &data.EnrichedAircraft{AiocHexCode: string(msg.Data)}
 
-		err := pipeline.EnrichAircraft(aircraft, enrichers)
-		if err != nil {
+		if err := pipeline.EnrichAircraft(aircraft, enrichers); err != nil {
 			log.Println("Error enriching aircraft:", err)
 			return
 		}
