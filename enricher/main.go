@@ -18,30 +18,13 @@ import (
 func main() {
 	log.Println("Enricher starting...")
 
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Failed to load .env file")
-		panic("Error loading .env file")
+	config, err := loadConfig()
+	if err != nil {
+		log.Fatal("Error loading configuration:", err)
+		panic(err)
 	}
 
-	natsHost := os.Getenv("DISCOVERY_NATS_HOST")
-	if natsHost == "" {
-		log.Fatal("DISCOVERY_NATS_HOST environment variable is not set")
-		panic("DISCOVERY_NATS_HOST not set")
-	}
-	
-	natsPort := os.Getenv("DISCOVERY_NATS_PORT")
-	if natsPort == "" {
-		log.Fatal("DISCOVERY_NATS_PORT environment variable is not set")
-		panic("DISCOVERY_NATS_PORT not set")
-	}
-
-	natsUrl := natsHost + ":" + natsPort
-
-	hexDbUrl := os.Getenv("HEXDB_URL")
-	if hexDbUrl == "" {
-		log.Fatal("HEXDB_URL environment variable is not set")
-		panic("HEXDB_URL not set")
-	}
+	natsUrl := config.DiscoveryNatsHost + ":" + config.DiscoveryNatsPort
 
 	log.Printf("Connecting to NATS at %s...\n", natsUrl)
 	m, err := messaging.NewNatsMessaging(natsUrl)
@@ -51,35 +34,35 @@ func main() {
 	}
 	defer m.Close()
 	log.Println("Connected to NATS")
-	
+
 	enrichers := []pipeline.Enricher{
-		&pipeline.HexDbEnricher{HexDbUrl: hexDbUrl},
+		&pipeline.HexDbEnricher{HexDbUrl: config.HexDbUrl},
 	}
+
+	p := pipeline.Pipeline{Enrichers: enrichers}
 
 	m.Subscribe("aircraft.raw", func(msg *nats.Msg) {
 		log.Println("Received message on subject:", msg.Subject)
-		// Process message, enrich aircraft, republish to enriched subject
+
 		aircraft := &data.EnrichedAircraft{AiocHexCode: string(msg.Data)}
 
-		err := pipeline.EnrichAircraft(aircraft, enrichers)
-		if err != nil {
+		if err := p.Enrich(aircraft); err != nil {
 			log.Println("Error enriching aircraft:", err)
 			return
 		}
-		log.Println("Enriched aircraft successfully, republishing...")
 
-		// Marshal aircraft to JSON
 		aircraftData, err := json.Marshal(aircraft)
 		if err != nil {
-			log.Println("Error marshalling enriched aircraft to JSON:", err)
+			log.Println("Error marshalling aircraft to JSON:", err)
 			return
 		}
 
 		if err := m.Publish("aircraft.enriched", aircraftData); err != nil {
-			log.Println("Error republishing enriched aircraft:", err)
+			log.Println("Error publishing aircraft:", err)
 			return
 		}
-		log.Println("Enriched aircraft republished successfully")
+
+		log.Println("Aircraft handled successfully:", aircraft.AiocHexCode)
 	})
 
 	// Catch interrupt signal to gracefully shutdown
@@ -89,4 +72,33 @@ func main() {
     <-sigChan // blocks until a signal is received
     fmt.Println("Shutting down gracefully...")
     m.Drain()
+}
+
+type Config struct {
+	DiscoveryNatsHost string `env:"DISCOVERY_NATS_HOST"`
+	DiscoveryNatsPort string `env:"DISCOVERY_NATS_PORT"`
+	HexDbUrl          string `env:"HEXDB_URL"`
+}
+
+func loadConfig() (Config, error) {
+	if err := godotenv.Load(); err != nil {
+		return Config{}, fmt.Errorf("failed to load .env file: %w", err)
+	}
+
+	var config Config
+
+	config.DiscoveryNatsHost = os.Getenv("DISCOVERY_NATS_HOST")
+	if config.DiscoveryNatsHost == "" {
+		return Config{}, fmt.Errorf("DISCOVERY_NATS_HOST environment variable is not set")
+	}
+	config.DiscoveryNatsPort = os.Getenv("DISCOVERY_NATS_PORT")
+	if config.DiscoveryNatsPort == "" {
+		return Config{}, fmt.Errorf("DISCOVERY_NATS_PORT environment variable is not set")
+	}
+	config.HexDbUrl = os.Getenv("HEXDB_URL")
+	if config.HexDbUrl == "" {
+		return Config{}, fmt.Errorf("HEXDB_URL environment variable is not set")
+	}
+	
+	return config, nil
 }
