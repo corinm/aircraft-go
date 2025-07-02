@@ -43,17 +43,32 @@ func main() {
 
 	p := &pipeline.Pipeline{Enrichers: enrichers}
 
-	h := &AircraftHandler{
-		pipeline:  p,
-		messaging: m,
-	}
-
 	m.Subscribe("aircraft.raw", func(msg *nats.Msg) {
 		go func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 			defer cancel()
 
-			h.HandleAircraft(ctx, msg)
+			log.Println("Handling aircraft with hex code:", string(msg.Data))
+
+			aircraft := &data.EnrichedAircraft{AiocHexCode: string(msg.Data)}
+
+			if err := p.Enrich(ctx, aircraft); err != nil {
+				log.Println("Error enriching aircraft:", err)
+				return
+			}
+
+			aircraftData, err := json.Marshal(aircraft)
+			if err != nil {
+				log.Println("Error marshalling aircraft to JSON:", err)
+				return
+			}
+
+			if err := m.Publish("aircraft.enriched", aircraftData); err != nil {
+				log.Println("Error publishing aircraft:", err)
+				return
+			}
+
+			log.Println("Aircraft handled successfully:", aircraft.AiocHexCode)
 		}()
 	})
 
@@ -64,35 +79,6 @@ func main() {
     <-sigChan // blocks until a signal is received
     fmt.Println("Shutting down gracefully...")
     m.Drain()
-}
-
-type AircraftHandler struct {
-	pipeline *pipeline.Pipeline
-	messaging *messaging.NatsMessaging
-}
-
-func (a *AircraftHandler) HandleAircraft(ctx context.Context, msg *nats.Msg) {
-	log.Println("Handling aircraft with hex code:", string(msg.Data))
-
-	aircraft := &data.EnrichedAircraft{AiocHexCode: string(msg.Data)}
-
-	if err := a.pipeline.Enrich(ctx, aircraft); err != nil {
-		log.Println("Error enriching aircraft:", err)
-		return
-	}
-
-	aircraftData, err := json.Marshal(aircraft)
-	if err != nil {
-		log.Println("Error marshalling aircraft to JSON:", err)
-		return
-	}
-
-	if err := a.messaging.Publish("aircraft.enriched", aircraftData); err != nil {
-		log.Println("Error publishing aircraft:", err)
-		return
-	}
-
-	log.Println("Aircraft handled successfully:", aircraft.AiocHexCode)
 }
 
 type Config struct {
