@@ -1,9 +1,10 @@
 package pipeline
 
 import (
+	"context"
 	"enricher/data"
 )
 
 type Enricher interface {
-	Enrich(a *data.EnrichedAircraft) error
+	Enrich(ctx context.Context, a *data.EnrichedAircraft) error
 }
