@@ -3,9 +3,9 @@ package pipeline
 import (
 	"encoding/json"
 	"enricher/data"
-	"errors"
-	"io"
+	"fmt"
 	"net/http"
+	"time"
 )
 
 type HexDbEnricher struct {
@@ -23,29 +23,30 @@ type hexDbResponse struct {
 }
 
 func hexDbGetAircraftInformation(hex string) (*hexDbResponse, error) {
-	r, err1 := http.Get("https://hexdb.io/api/v1/aircraft/" + hex)
-	if err1 != nil {
-		return nil, err1
+	url := fmt.Sprintf("https://hexdb.io/api/v1/aircraft/%s", hex)
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request for HexDB (%s): %w", url, err)
 	}
-	defer r.Body.Close()
 	
-	if r.StatusCode != http.StatusOK {
-		return nil, errors.New("failed to fetch data from HexDB, status code: " + r.Status)
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch data from HexDB (%s): %w", url, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code from from HexDB (%s), status code: %s", url, resp.Status)
 	}
 
-	body, err2 := io.ReadAll(r.Body)
-	if err2 != nil {
-		return nil, err2
+	var result hexDbResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("failed to decode response from HexDB (%s): %w", url, err)
 	}
 
-	response := hexDbResponse{}
-
-	err3 := json.Unmarshal(body, &response)
-	if err3 != nil {
-		return nil, err3
-	}
-
-	return &response, nil
+	return &result, nil
 }
 
 func (e *HexDbEnricher) Enrich(a *data.EnrichedAircraft) error {
