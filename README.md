@@ -48,6 +48,7 @@ go run main.go
 - [x] Re-add NATS
 - [ ] Implement `enricher` service
   - [x] Enrich with HexDB data
+  - [ ] Use Context appropriately with enrichers (e.g. set deadline, cancel gracefully)
   - [ ] Enrich with PlaneAlertDb data (i.e. whether it's an interesting aircraft and why)
   - [ ] Investigate any other potential data sources
 - [ ] Implement `evaluator` service
