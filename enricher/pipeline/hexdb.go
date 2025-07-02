@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"context"
 	"encoding/json"
 	"enricher/data"
 	"fmt"
@@ -22,11 +23,11 @@ type hexDbResponse struct {
 	OperatorFlagCode string `json:"OperatorFlagCode"`
 }
 
-func hexDbGetAircraftInformation(hex string) (*hexDbResponse, error) {
+func hexDbGetAircraftInformation(ctx context.Context, hex string) (*hexDbResponse, error) {
 	url := fmt.Sprintf("https://hexdb.io/api/v1/aircraft/%s", hex)
 
 	client := &http.Client{Timeout: 10 * time.Second}
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request for HexDB (%s): %w", url, err)
 	}
@@ -49,8 +50,8 @@ func hexDbGetAircraftInformation(hex string) (*hexDbResponse, error) {
 	return &result, nil
 }
 
-func (e *HexDbEnricher) Enrich(a *data.EnrichedAircraft) error {
-	resp, err := hexDbGetAircraftInformation(a.AiocHexCode)
+func (e *HexDbEnricher) Enrich(ctx context.Context, a *data.EnrichedAircraft) error {
+	resp, err := hexDbGetAircraftInformation(ctx, a.AiocHexCode)
 	if err != nil {
 		return err
 	}

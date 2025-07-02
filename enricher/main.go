@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"enricher/data"
 	"enricher/messaging"
@@ -10,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/lpernett/godotenv"
 	"github.com/nats-io/nats.go"
@@ -30,7 +32,7 @@ func main() {
 	m, err := messaging.NewNatsMessaging(natsUrl)
 	if err != nil {
 		log.Fatal("Error creating messaging client:", err)
-		return
+		panic(err)
 	}
 	defer m.Close()
 	log.Println("Connected to NATS")
@@ -39,30 +41,35 @@ func main() {
 		&pipeline.HexDbEnricher{HexDbUrl: config.HexDbUrl},
 	}
 
-	p := pipeline.Pipeline{Enrichers: enrichers}
+	p := &pipeline.Pipeline{Enrichers: enrichers}
 
 	m.Subscribe("aircraft.raw", func(msg *nats.Msg) {
-		log.Println("Received message on subject:", msg.Subject)
+		go func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+			defer cancel()
 
-		aircraft := &data.EnrichedAircraft{AiocHexCode: string(msg.Data)}
+			log.Println("Handling aircraft with hex code:", string(msg.Data))
 
-		if err := p.Enrich(aircraft); err != nil {
-			log.Println("Error enriching aircraft:", err)
-			return
-		}
+			aircraft := &data.EnrichedAircraft{AiocHexCode: string(msg.Data)}
 
-		aircraftData, err := json.Marshal(aircraft)
-		if err != nil {
-			log.Println("Error marshalling aircraft to JSON:", err)
-			return
-		}
+			if err := p.Enrich(ctx, aircraft); err != nil {
+				log.Println("Error enriching aircraft:", err)
+				return
+			}
 
-		if err := m.Publish("aircraft.enriched", aircraftData); err != nil {
-			log.Println("Error publishing aircraft:", err)
-			return
-		}
+			aircraftData, err := json.Marshal(aircraft)
+			if err != nil {
+				log.Println("Error marshalling aircraft to JSON:", err)
+				return
+			}
 
-		log.Println("Aircraft handled successfully:", aircraft.AiocHexCode)
+			if err := m.Publish("aircraft.enriched", aircraftData); err != nil {
+				log.Println("Error publishing aircraft:", err)
+				return
+			}
+
+			log.Println("Aircraft handled successfully:", aircraft.AiocHexCode)
+		}()
 	})
 
 	// Catch interrupt signal to gracefully shutdown
