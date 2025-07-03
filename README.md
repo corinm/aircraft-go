@@ -40,10 +40,11 @@ go run main.go
 - [x] Re-implement`discoverer` service using Go
   - [x] Publish aircraft when found
 - [x] Re-add NATS
-- [ ] Implement `enricher` service
+- [x] Implement `enricher` service
   - [x] Enrich with HexDB data
   - [ ] Use Context appropriately with enrichers (e.g. set deadline, cancel gracefully)
-  - [ ] Enrich with PlaneAlertDb data (i.e. whether it's an interesting aircraft and why)
+  - [x] Enrich with PlaneAlertDb data (i.e. whether it's an interesting aircraft and why)
+  - [ ] What should happen if an enricher fails? Should it continue? Later enricher may be able to fill in gaps
   - [ ] Investigate any other potential data sources
 - [ ] Implement `evaluator` service
   - [ ] Implement logic to identify interesting aircraft
