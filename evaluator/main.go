@@ -63,12 +63,12 @@ func main() {
 	})
 
 	// Catch interrupt signal to gracefully shutdown
-    sigChan := make(chan os.Signal, 1)
-    signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-    <-sigChan // blocks until a signal is received
-    fmt.Println("Shutting down gracefully...")
-    m.Drain()
+	<-sigChan // blocks until a signal is received
+	fmt.Println("Shutting down gracefully...")
+	m.Drain()
 }
 
 func evaluateAircraft(aircraft data.EnrichedAircraft) (isInteresting bool, err error) {
