@@ -83,7 +83,7 @@ func fetchAndPublishAircraft(f fetcher.Tar1090AdsbFetcher, m *messaging.NatsMess
 	log.Printf("Found %d aircraft\n", len(aircraft))
 
 	for _, a := range aircraft {
-		err := m.Publish("aircraft.raw", []byte(a.AiocHexCode))
+		err := m.Publish("aircraft.raw", []byte(a.IcaoHexCode))
 		if err != nil {
 			log.Println("Error publishing aircraft:", err)
 		}

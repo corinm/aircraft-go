@@ -17,7 +17,7 @@ type hexDbResponse struct {
 	// ModeS            string `json:"ModeS"`
 	Registration     string `json:"Registration"`
 	Manufacturer     string `json:"Manufacturer"`
-	ICAOTypeCode     string `json:"ICAOTypeCode"`
+	IcaoTypeCode     string `json:"ICAOTypeCode"`
 	Type             string `json:"Type"`
 	RegisteredOwners string `json:"RegisteredOwners"`
 	OperatorFlagCode string `json:"OperatorFlagCode"`
@@ -51,14 +51,14 @@ func hexDbGetAircraftInformation(ctx context.Context, hex string) (*hexDbRespons
 }
 
 func (e *HexDbEnricher) Enrich(ctx context.Context, a *data.EnrichedAircraft) error {
-	resp, err := hexDbGetAircraftInformation(ctx, a.AiocHexCode)
+	resp, err := hexDbGetAircraftInformation(ctx, a.IcaoHexCode)
 	if err != nil {
 		return err
 	}
 
 	a.Registration = resp.Registration
 	a.Manufacturer = resp.Manufacturer
-	a.ICAOTypeCode = resp.ICAOTypeCode
+	a.IcaoTypeCode = resp.IcaoTypeCode
 	a.AircraftType = resp.Type
 	a.RegisteredOwners = resp.RegisteredOwners
 	a.IcaoAirlineCode = resp.OperatorFlagCode

@@ -55,7 +55,7 @@ func main() {
 			return
 		}
 
-		log.Printf("Evaluating aircraft: %s\n", aircraft.AiocHexCode)
+		log.Printf("Evaluating aircraft: %s\n", aircraft.IcaoHexCode)
 		shouldNotify, err := evaluateAircraft(aircraft)
 		if err != nil {
 			log.Println("Error evaluating aircraft:", err)
@@ -63,11 +63,11 @@ func main() {
 		}
 
 		if !shouldNotify {
-			log.Printf("Aircraft %s does not meet criteria, no notification sent.\n", aircraft.AiocHexCode)
+			log.Printf("Aircraft %s does not meet criteria, no notification sent.\n", aircraft.IcaoHexCode)
 			return
 		}
 
-		log.Printf("Aircraft %s meets criteria, sending notification...\n", aircraft.AiocHexCode)
+		log.Printf("Aircraft %s meets criteria, sending notification...\n", aircraft.IcaoHexCode)
 		// Print the response if you want
 		if err := m.Publish("aircraft.interesting", msg.Data); err != nil {
 			log.Println("Error republishing enriched aircraft:", err)
