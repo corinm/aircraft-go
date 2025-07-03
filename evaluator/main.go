@@ -45,11 +45,7 @@ func main() {
 		}
 
 		log.Printf("Evaluating aircraft: %s\n", aircraft.IcaoHexCode)
-		isInteresting, err := evaluateAircraft(aircraft)
-		if err != nil {
-			log.Println("Error evaluating aircraft:", err)
-			return
-		}
+		isInteresting := evaluateAircraft(aircraft)
 
 		if !isInteresting {
 			return
@@ -71,8 +67,8 @@ func main() {
 	m.Drain()
 }
 
-func evaluateAircraft(aircraft data.EnrichedAircraft) (isInteresting bool, err error) {
-	return false, nil
+func evaluateAircraft(aircraft data.EnrichedAircraft) bool {
+	return aircraft.PlaneAlertDbCategory != ""
 }
 
 type Config struct {
@@ -95,6 +91,6 @@ func loadConfig() (Config, error) {
 	if config.DiscoveryNatsPort == "" {
 		return Config{}, fmt.Errorf("DISCOVERY_NATS_PORT environment variable is not set")
 	}
-	
+
 	return config, nil
 }
