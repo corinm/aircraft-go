@@ -4,18 +4,35 @@ import (
 	"context"
 	"encoding/csv"
 	"enricher/data"
-	"fmt"
 	"log"
 	"os"
+	"time"
 )
 
-type PlaneAlertDbEnricher struct {
+type PlaneAlertDbAircraft struct {
+	Icao string
+	Registration string
+	Operator string
+	Type string
+	IcaoType string
+	Cmpg string
+	Tag1 string
+	Tag2 string
+	Tag3 string
+	Category string
+	Link string
+}
 
+type PlaneAlertDbEnricher struct {
+	data map[string]PlaneAlertDbAircraft
 }
 
 func NewPlaneAlertDbEnricher(pathToCsv string) (*PlaneAlertDbEnricher, error) {
+	start := time.Now()
+	
 	// Note: Reading a 2.2MB file into memory
-	// It's done once on start-up so, while blocking, it may be acceptable
+	// It's done once on start-up so, while blocking, it is probably acceptable
+	// Memory usage will scale with CSV size
 	file, err := os.Open(pathToCsv)
 	if err != nil {
 		return nil, err
@@ -30,16 +47,14 @@ func NewPlaneAlertDbEnricher(pathToCsv string) (*PlaneAlertDbEnricher, error) {
 		return nil, err
 	}
 
-	var aircraftList []PlaneAlertDbAircraft
+	var records = make(map[string]PlaneAlertDbAircraft)
 
-	// Read the entire CSV content into memory
 	for {
 		record, err := reader.Read()
 		if err != nil {
 			break
 		}
 		
-		// TODO: Put this into a map of ICAO -> PlaneAlertDbAircraft
 		aircraft := PlaneAlertDbAircraft{
 			Icao:         record[0],
 			Registration: record[1],
@@ -53,29 +68,55 @@ func NewPlaneAlertDbEnricher(pathToCsv string) (*PlaneAlertDbEnricher, error) {
 			Category:     record[9],
 			Link:         record[10],
 		}
-		aircraftList = append(aircraftList, aircraft)
+		records[aircraft.Icao] = aircraft
 	}
 
-	log.Printf("Loaded %d aircraft from PlaneAlertDB CSV File\n", len(aircraftList))
-	fmt.Printf("First aircraft: %+v\n", aircraftList[0])
+	log.Printf("Loaded %d aircraft from PlaneAlertDB CSV File in %s\n", len(records), time.Since(start))
 
-	return &PlaneAlertDbEnricher{}, nil
+	return &PlaneAlertDbEnricher{data: records}, nil
 }
 
 func (e *PlaneAlertDbEnricher) Enrich(ctx context.Context, a *data.EnrichedAircraft) error {
-	return nil
-}
+	data := e.data[a.AiocHexCode]
+	if data.Icao == "" {
+		return nil
+	}
 
-type PlaneAlertDbAircraft struct {
-	Icao string
-	Registration string
-	Operator string
-	Type string
-	IcaoType string
-	Cmpg string
-	Tag1 string
-	Tag2 string
-	Tag3 string
-	Category string
-	Link string
+	// Fill in any missing fields
+	if (a.Registration == "") {
+		a.Registration = data.Registration
+	}
+
+	if (a.ICAOTypeCode == "") {
+		a.ICAOTypeCode = data.IcaoType
+	}
+
+	if (a.RegisteredOwners == "") {
+		a.RegisteredOwners = data.Operator
+	}
+
+
+	// Add new fields
+	a.PlaneAlertDbCategory = data.Category
+
+	if data.Cmpg != "" {
+		switch data.Cmpg {
+		case "Civ":
+			a.CMPG = "Civilian"
+		case "Mil":
+			a.CMPG = "Military"
+		case "Pol":
+			a.CMPG = "Police"
+		case "Gov":
+			a.CMPG = "Government"
+		default:
+			a.CMPG = "Unknown"
+		}
+	}
+
+	a.PlaneAlertDbTags = []string{data.Tag1, data.Tag2, data.Tag3}
+
+	// Note: There is also a "Link" field available that is currently unused
+
+	return nil
 }
