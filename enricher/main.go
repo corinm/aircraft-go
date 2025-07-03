@@ -37,8 +37,15 @@ func main() {
 	defer m.Close()
 	log.Println("Connected to NATS")
 
+	planeAlertDbEnricher, err := pipeline.NewPlaneAlertDbEnricher("./lib/plane-alert-db/plane-alert-db.csv")
+	if err != nil {
+		log.Fatal("Error creating PlaneAlertDbEnricher:", err)
+		panic(err)
+	}
+
 	enrichers := []pipeline.Enricher{
 		&pipeline.HexDbEnricher{HexDbUrl: config.HexDbUrl},
+		planeAlertDbEnricher,
 	}
 
 	p := &pipeline.Pipeline{Enrichers: enrichers}
