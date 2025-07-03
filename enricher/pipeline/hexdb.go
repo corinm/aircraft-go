@@ -38,6 +38,10 @@ func hexDbGetAircraftInformation(ctx context.Context, hex string) (*hexDbRespons
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("aircraft with hex code %s not found in HexDB (%s)", hex, url)
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code from from HexDB (%s), status code: %s", url, resp.Status)
 	}
