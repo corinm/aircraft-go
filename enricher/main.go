@@ -57,7 +57,7 @@ func main() {
 
 			log.Println("Handling aircraft with hex code:", string(msg.Data))
 
-			aircraft := &data.EnrichedAircraft{AiocHexCode: string(msg.Data)}
+			aircraft := &data.EnrichedAircraft{IcaoHexCode: string(msg.Data)}
 
 			if err := p.Enrich(ctx, aircraft); err != nil {
 				log.Println("Error enriching aircraft:", err)
@@ -75,7 +75,7 @@ func main() {
 				return
 			}
 
-			log.Println("Aircraft handled successfully:", aircraft.AiocHexCode)
+			log.Println("Aircraft handled successfully:", aircraft.IcaoHexCode)
 		}()
 	})
 

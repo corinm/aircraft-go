@@ -103,5 +103,5 @@ func (f Tar1090AdsbFetcher) FetchAircraft() ([]data.RawAircraft, error) {
 }
 
 func transformTar1090AircraftToAircraft(a tar1090response_aircraft) data.RawAircraft {
-	return data.RawAircraft{ AiocHexCode: a.Hex }
+	return data.RawAircraft{ IcaoHexCode: a.Hex }
 }

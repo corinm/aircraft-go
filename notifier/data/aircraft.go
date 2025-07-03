@@ -1,7 +1,7 @@
 package data
 
 type EnrichedAircraft struct {
-	AiocHexCode          string   `json:"aiocHexCode"`          // e.g. "4CA293"
+	IcaoHexCode          string   `json:"IcaoHexCode"`          // e.g. "4CA293"
 
 	Registration         string   `json:"registration"`         // e.g. "G-EZBZ"
 	Manufacturer         string   `json:"manufacturer"`         // e.g. "Boeing"

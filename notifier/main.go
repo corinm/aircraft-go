@@ -91,5 +91,5 @@ func main() {
 }
 
 func formatAircraft(aircraft data.EnrichedAircraft) string {
-	return fmt.Sprintf("Interesting aircraft: %s (%s) %s %s %s", aircraft.Registration, aircraft.AiocHexCode, aircraft.RegisteredOwners, aircraft.Manufacturer, aircraft.AircraftType)
+	return fmt.Sprintf("Interesting aircraft: %s (%s) %s %s %s", aircraft.Registration, aircraft.IcaoHexCode, aircraft.RegisteredOwners, aircraft.Manufacturer, aircraft.AircraftType)
 }

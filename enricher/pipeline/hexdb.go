@@ -51,7 +51,7 @@ func hexDbGetAircraftInformation(ctx context.Context, hex string) (*hexDbRespons
 }
 
 func (e *HexDbEnricher) Enrich(ctx context.Context, a *data.EnrichedAircraft) error {
-	resp, err := hexDbGetAircraftInformation(ctx, a.AiocHexCode)
+	resp, err := hexDbGetAircraftInformation(ctx, a.IcaoHexCode)
 	if err != nil {
 		return err
 	}
