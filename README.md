@@ -46,8 +46,8 @@ go run main.go
   - [x] Enrich with PlaneAlertDb data (i.e. whether it's an interesting aircraft and why)
   - [ ] What should happen if an enricher fails? Should it continue? Later enricher may be able to fill in gaps
   - [ ] Investigate any other potential data sources
-- [ ] Implement `evaluator` service
-  - [ ] Implement logic to identify interesting aircraft
+- [x] Implement `evaluator` service
+  - [x] Implement logic to identify interesting aircraft
 - [x] Implement `notifier` service
   - [x] Publish notifications using Pushover
 - [ ] Try out https://github.com/caarlos0/env
