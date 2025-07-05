@@ -53,3 +53,4 @@ go run main.go
 - [ ] Try out https://github.com/caarlos0/env
 - [ ] Add `historian` service
 - [ ] Add `stats` service
+- [ ] Add a `monitoring` service to keep track of enrichment failures (could use this to compare sources and find backup's for when one source doesn't have any details)
