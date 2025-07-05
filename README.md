@@ -46,8 +46,7 @@ This is a personal project I'm using to learn and experiment. I want to be able 
 Currently only the `enricher` service has unit tests
 
 ```bash
-cd enricher
-go test ./...
+make unit-tests
 ```
 
 ## TODO list
