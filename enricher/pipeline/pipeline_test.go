@@ -7,18 +7,20 @@ import (
 	"testing"
 )
 
-func TestPipeline(t *testing.T) {
+func TestPipelineResult(t *testing.T) {
 	tests := []struct {
 		name     string
 		enrichers []Enricher
 		input data.EnrichedAircraft
 		expectedOutput data.EnrichedAircraft
+		expectError bool
 	}{
 		{
 			name: "No enrichers",
 			enrichers: []Enricher{},
 			input: data.EnrichedAircraft{ IcaoHexCode: "000000" },
 			expectedOutput: data.EnrichedAircraft{IcaoHexCode: "000000"},
+			expectError: false,
 		},
 		{
 			name: "With enrichers",
@@ -32,6 +34,7 @@ func TestPipeline(t *testing.T) {
 				Registration: "G-MOCK",
 				Manufacturer: "Mock Ltd.",
 			},
+			expectError: false,
 		},
 		{
 			name: "Error in enricher doesn't stop pipeline",
@@ -46,6 +49,7 @@ func TestPipeline(t *testing.T) {
 				Registration: "G-MOCK",
 				Manufacturer: "Mock Ltd.",
 			},
+			expectError: true,
 		},
 	}
 
@@ -58,7 +62,7 @@ func TestPipeline(t *testing.T) {
 			aircraft := tt.input
 
 			err := p.Enrich(context.Background(), &aircraft)
-			if err != nil {
+			if err != nil && !tt.expectError {
 				t.Errorf("Expected no error, got %v", err)
 			}
 
@@ -72,6 +76,51 @@ func TestPipeline(t *testing.T) {
 
 			if aircraft.Manufacturer != tt.expectedOutput.Manufacturer {
 				t.Errorf("Expected aircraft Manufacturer to be %s, got %s", tt.expectedOutput.Manufacturer, aircraft.Manufacturer)
+			}
+		})
+	}
+}
+
+func TestPipelineErrorHandling(t *testing.T) {
+	tests := []struct {
+		name     string
+		enrichers []Enricher
+		input data.EnrichedAircraft
+		expectedErrors []error
+	}{
+		{
+			name: "Error in enricher",
+			enrichers: []Enricher{
+				&MockErrorEnricher{},
+			},
+			input: data.EnrichedAircraft{ IcaoHexCode: "000000" },
+			expectedErrors: []error{errors.New("MockErrorEnricher failed to enrich")},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := Pipeline{
+				Enrichers: tt.enrichers,
+			}
+
+			aircraft := tt.input
+
+			errs := p.Enrich(context.Background(), &aircraft)
+			if errs == nil {
+				t.Errorf("Expected errors, got nil")
+				return
+			}
+
+			if len(errs) != len(tt.expectedErrors) {
+				t.Errorf("Expected %d errors, got %d", len(tt.expectedErrors), len(errs))
+				return
+			}
+
+			for i, expectedErr := range tt.expectedErrors {
+				if errs[i].Error() != expectedErr.Error() {
+					t.Errorf("Expected error %d to be %v, got %v", i, expectedErr, errs[i])
+				}
 			}
 		})
 	}
