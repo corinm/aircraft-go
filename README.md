@@ -56,15 +56,20 @@ make unit-tests
 - [x] Re-add NATS
 - [x] Implement `enricher` service
   - [x] Enrich with HexDB data
-  - [ ] Use Context appropriately with enrichers (e.g. set deadline, cancel gracefully)
   - [x] Enrich with PlaneAlertDb data (i.e. whether it's an interesting aircraft and why)
-  - [ ] What should happen if an enricher fails? Should it continue? Later enricher may be able to fill in gaps
+  - [x] What should happen if an enricher fails? Should it continue? Later enricher may be able to fill in gaps
+  - [ ] Use Context appropriately with enrichers (e.g. set deadline, cancel gracefully)
   - [ ] Investigate any other potential data sources
 - [x] Implement `evaluator` service
   - [x] Implement logic to identify interesting aircraft
 - [x] Implement `notifier` service
   - [x] Publish notifications using Pushover
-- [ ] Try out https://github.com/caarlos0/env
+- [ ] Add Postgres
 - [ ] Add `historian` service
 - [ ] Add `stats` service
-- [ ] Add a `monitoring` service to keep track of enrichment failures (could use this to compare sources and find backup's for when one source doesn't have any details)
+- [ ] Add a `monitoring` service to keep track of enrichment failures (could use this to compare sources and find backup enrichers for when one source doesn't have any details)
+- [ ] Other / refactoring / future
+  - [ ] Try out https://github.com/caarlos0/env
+  - [ ] Back-off approach for enrichers if they fail with certain error codes (not 404)
+  - [ ] Add a "system context" C4-style diagram
+  - [ ] Add some architecture docs explaining design choices
