@@ -3,6 +3,7 @@ package pipeline
 import (
 	"context"
 	"enricher/data"
+	"errors"
 	"testing"
 )
 
@@ -23,6 +24,20 @@ func TestPipeline(t *testing.T) {
 			name: "With enrichers",
 			enrichers: []Enricher{
 				&MockRegistrationEnricher{},
+				&MockManufacturerEnricher{},
+			},
+			input: data.EnrichedAircraft{ IcaoHexCode: "000000" },
+			expectedOutput: data.EnrichedAircraft{
+				IcaoHexCode: "000000",
+				Registration: "G-MOCK",
+				Manufacturer: "Mock Ltd.",
+			},
+		},
+		{
+			name: "Error in enricher doesn't stop pipeline",
+			enrichers: []Enricher{
+				&MockRegistrationEnricher{},
+				&MockErrorEnricher{},
 				&MockManufacturerEnricher{},
 			},
 			input: data.EnrichedAircraft{ IcaoHexCode: "000000" },
@@ -72,4 +87,9 @@ type MockManufacturerEnricher struct{}
 func (m *MockManufacturerEnricher) Enrich(ctx context.Context, aircraft *data.EnrichedAircraft) error {
 	aircraft.Manufacturer = "Mock Ltd."
 	return nil
+}
+
+type MockErrorEnricher struct{}
+func (m *MockErrorEnricher) Enrich(ctx context.Context, aircraft *data.EnrichedAircraft) error {
+	return errors.New("MockErrorEnricher failed to enrich")
 }
