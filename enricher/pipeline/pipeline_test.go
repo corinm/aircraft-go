@@ -29,7 +29,7 @@ func TestPipeline(t *testing.T) {
 			expectedOutput: data.EnrichedAircraft{
 				IcaoHexCode: "000000",
 				Registration: "G-MOCK",
-				Manufacturer: "Mock Manufacturer",
+				Manufacturer: "Mock Ltd.",
 			},
 		},
 	}
@@ -70,6 +70,6 @@ func (m *MockRegistrationEnricher) Enrich(ctx context.Context, aircraft *data.En
 
 type MockManufacturerEnricher struct{}
 func (m *MockManufacturerEnricher) Enrich(ctx context.Context, aircraft *data.EnrichedAircraft) error {
-	aircraft.Manufacturer = "Mock Manufacturer"
+	aircraft.Manufacturer = "Mock Ltd."
 	return nil
 }
