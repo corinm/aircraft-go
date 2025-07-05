@@ -15,7 +15,7 @@ Combines local ADS-B data with other data sources and notifies about interesting
 
 ## Getting started
 
-### Using `devspace`
+### Using `devspace` and K8s
 
 #### Install NATS
 
@@ -33,6 +33,20 @@ The target service will start in `dev` mode and dependent services will be deplo
 cd notifier
 devspace dev
 go run main.go
+```
+
+## Tests
+
+### Testing strategy
+
+This is a personal project I'm using to learn and experiment. I want to be able to make changes as easily as possible, therefore I'm intentionally keeping automated testing very minimal for now. I’ll add tests where they make sense and where they help me understand or validate something specific, but I’m not aiming for the type of test coverage I'd expect from production-grade software.
+
+### Running unit tests
+
+Currently only the `enricher` service has unit tests
+
+```bash
+make unit-tests
 ```
 
 ## TODO list
