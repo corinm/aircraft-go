@@ -77,7 +77,7 @@ func NewPlaneAlertDbEnricher(pathToCsv string) (*PlaneAlertDbEnricher, error) {
 }
 
 func (e *PlaneAlertDbEnricher) Enrich(ctx context.Context, a *data.EnrichedAircraft) error {
-	data := e.data[a.AiocHexCode]
+	data := e.data[a.IcaoHexCode]
 	if data.Icao == "" {
 		return nil
 	}
@@ -87,8 +87,8 @@ func (e *PlaneAlertDbEnricher) Enrich(ctx context.Context, a *data.EnrichedAircr
 		a.Registration = data.Registration
 	}
 
-	if (a.ICAOTypeCode == "") {
-		a.ICAOTypeCode = data.IcaoType
+	if (a.IcaoTypeCode == "") {
+		a.IcaoTypeCode = data.IcaoType
 	}
 
 	if (a.RegisteredOwners == "") {
