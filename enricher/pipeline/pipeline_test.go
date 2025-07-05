@@ -6,20 +6,59 @@ import (
 	"testing"
 )
 
-func TestPipelineNoEnrichersDoesNothing(t *testing.T) {
-	p := Pipeline{}
-
-	aircraft := &data.EnrichedAircraft{
-		IcaoHexCode: "000000",
+func TestPipeline(t *testing.T) {
+	tests := []struct {
+		name     string
+		enrichers []Enricher
+		input data.EnrichedAircraft
+		expectedOutput data.EnrichedAircraft
+	}{
+		{
+			name: "No enrichers",
+			enrichers: []Enricher{},
+			input: data.EnrichedAircraft{ IcaoHexCode: "000000" },
+			expectedOutput: data.EnrichedAircraft{IcaoHexCode: "000000"},
+		},
+		{
+			name: "With enrichers",
+			enrichers: []Enricher{
+				&MockRegistrationEnricher{},
+				&MockManufacturerEnricher{},
+			},
+			input: data.EnrichedAircraft{ IcaoHexCode: "000000" },
+			expectedOutput: data.EnrichedAircraft{
+				IcaoHexCode: "000000",
+				Registration: "G-MOCK",
+				Manufacturer: "Mock Manufacturer",
+			},
+		},
 	}
 
-	err := p.Enrich(context.Background(), aircraft)
-	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := Pipeline{
+				Enrichers: tt.enrichers,
+			}
 
-	if aircraft.IcaoHexCode != "000000" {
-		t.Errorf("Expected aircraft IcaoHexCode to be unchanged i.e. '000000', got %s", aircraft.IcaoHexCode)
+			aircraft := tt.input
+
+			err := p.Enrich(context.Background(), &aircraft)
+			if err != nil {
+				t.Errorf("Expected no error, got %v", err)
+			}
+
+			if aircraft.IcaoHexCode != tt.expectedOutput.IcaoHexCode {
+				t.Errorf("Expected aircraft IcaoHexCode to be %s, got %s", tt.expectedOutput.IcaoHexCode, aircraft.IcaoHexCode)
+			}
+
+			if aircraft.Registration != tt.expectedOutput.Registration {
+				t.Errorf("Expected aircraft Registration to be %s, got %s", tt.expectedOutput.Registration, aircraft.Registration)
+			}
+
+			if aircraft.Manufacturer != tt.expectedOutput.Manufacturer {
+				t.Errorf("Expected aircraft Manufacturer to be %s, got %s", tt.expectedOutput.Manufacturer, aircraft.Manufacturer)
+			}
+		})
 	}
 }
 
@@ -33,30 +72,4 @@ type MockManufacturerEnricher struct{}
 func (m *MockManufacturerEnricher) Enrich(ctx context.Context, aircraft *data.EnrichedAircraft) error {
 	aircraft.Manufacturer = "Mock Manufacturer"
 	return nil
-}
-
-func TestPipelineRunsEnrichers(t *testing.T) {
-	p := Pipeline{
-		Enrichers: []Enricher{
-			&MockRegistrationEnricher{},
-			&MockManufacturerEnricher{},
-		},
-	}
-
-	aircraft := &data.EnrichedAircraft{
-		IcaoHexCode: "000000",
-	}
-
-	errs := p.Enrich(context.Background(), aircraft)
-	if errs != nil {
-		t.Errorf("Expected no error, got %v", errs)
-	}
-
-	if aircraft.Registration != "G-MOCK" {
-		t.Errorf("Expected aircraft Registration to be 'G-MOCK', got %s", aircraft.Registration)
-	}
-
-	if aircraft.Manufacturer != "Mock Manufacturer" {
-		t.Errorf("Expected aircraft Manufacturer to be 'Mock Manufacturer', got %s", aircraft.Manufacturer)
-	}
 }
