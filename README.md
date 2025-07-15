@@ -2,54 +2,21 @@
 
 Combines local ADS-B data with other data sources and notifies about interesting aircraft.
 
-## Overview
+## About the project
+
+![AI-generated art representing the project](image.jpeg)
 
 ### Key features
 
 - Triggers Push Notifications when interesting aircraft are spotted by tar1090
-- Keeps track of all seen aircraft
+- Keeps track of all seen aircraft (in progress)
+- Displays statistics about aircraft seen (to do)
 
 ### Diagram
 
 ![C4 Model-style "Container" diagram](docs/Aircraft-Excalidraw-2025-07-03-1721.svg)
 
-## Getting started
-
-### Using `devspace` and K8s
-
-#### Install NATS
-
-```bash
-helm repo add nats https://nats-io.github.io/k8s/helm/charts/
-helm repo update
-helm install my-nats nats/nats
-```
-
-#### To develop a service:
-
-The target service will start in `dev` mode and dependent services will be deployed alongside it in `deploy` mode:
-
-```bash
-cd notifier
-devspace dev
-go run main.go
-```
-
-## Tests
-
-### Testing strategy
-
-This is a personal project I'm using to learn and experiment. I want to be able to make changes as easily as possible, therefore I'm intentionally keeping automated testing very minimal for now. I’ll add tests where they make sense and where they help me understand or validate something specific, but I’m not aiming for the type of test coverage I'd expect from production-grade software.
-
-### Running unit tests
-
-Currently only the `enricher` service has unit tests
-
-```bash
-make unit-tests
-```
-
-## TODO list
+### Roadmap / TO DO list
 
 - [x] Re-implement`discoverer` service using Go
   - [x] Publish aircraft when found
@@ -73,3 +40,68 @@ make unit-tests
   - [ ] Back-off approach for enrichers if they fail with certain error codes (not 404)
   - [ ] Add a "system context" C4-style diagram
   - [ ] Add some architecture docs explaining design choices
+
+## Getting started
+
+### Pre-requisites
+
+- A Kubernetes (K8s) cluster
+- [kubectl](https://kubernetes.io/docs/tasks/tools/) or your preferred K8s tool
+- A K8s namespace of your choosing e.g. `aircraft`
+  ```bash
+  kubectl create namespace aircraft
+  ```
+- [Install DevSpace](https://www.devspace.sh/docs/getting-started/installation)
+- Install NATS on your K8s cluster
+  ```bash
+  helm repo add nats https://nats-io.github.io/k8s/helm/charts/
+  helm repo update
+  helm install my-nats nats/nats
+  ```
+- A tar1090 API endpoint available e.g. by running [Readsb](https://github.com/wiedehopf/readsb) on your local network
+
+### Installation
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/corinm/aircraft-go.git
+   ```
+2. Create and populate `.env` files in each service (refer to `.env.example` files)
+3. Ensure you are in your chosen namespace
+   ```
+   devspace use namespace
+   # Select your namespace from the drop-down
+   ```
+4. Optional: For a production-like deployment use devspace's deploy command
+   ```bash
+   devspace deploy
+   ```
+5. Optional: To develop a specific service `cd` into the service directory and use devspace's dev command
+   ```bash
+   cd ./notifier
+   devspace dev
+   ```
+
+### Usage
+
+- Polling for aircraft will start automatically when the `discoverer` starts up
+- In future there will be API endpoints and a dashboard to view aircraft data and statistics
+
+## Tests
+
+### Testing strategy
+
+This is a personal project I'm using to learn and experiment. I want to be able to make changes as easily as possible, therefore I'm intentionally keeping automated testing very minimal for now. I’ll add tests where they make sense and where they help me understand or validate something specific, but I’m not aiming for the type of test coverage I'd expect from production-grade software.
+
+### Running unit tests
+
+Currently only the `enricher` service has unit tests
+
+```bash
+make unit-tests
+```
+
+## Acknowledgements
+
+- Readme structure based on [Best-README-Template](https://github.com/othneildrew/Best-README-Template/tree/main)
+- AI-generated artwork created using [Perchance](https://perchance.org/ai-text-to-image-generator)
