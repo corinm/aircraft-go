@@ -60,6 +60,14 @@ Combines local ADS-B data with other data sources and notifies about interesting
   ```
 - A tar1090 API endpoint available e.g. by running [Readsb](https://github.com/wiedehopf/readsb) on your local network
 
+#### My ADS-B setup
+
+- An [antenna that can pick up 1090MHz](https://www.amazon.co.uk/Bingfu-Magnetic-20-1300MHz-Compatible-Whistler/dp/B08YNF3DK7)
+- An [adapter](https://www.amazon.co.uk/Coaxial-Adapter-Converter-Connectors-Wireless/dp/B0B4SDLLJ6) if the antenna has a different connector to the dongle
+- A [USB SDR ADS-B Receiver Dongle](https://thepihut.com/products/flightaware-pro-stick-plus-usb-sdr-ads-b-receiver)
+- A Ubuntu Server VM with access to a USB port
+- [Readsb](https://github.com/wiedehopf/readsb) installed directly onto Ubuntu
+
 ### Installation
 
 1. Clone the repository
