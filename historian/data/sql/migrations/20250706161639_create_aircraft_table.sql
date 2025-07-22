@@ -15,9 +15,9 @@ CREATE TABLE aircraft (
 
     cmpg cmpg NOT NULL DEFAULT 'Unknown',
 
-    planeAlertDbCategory VARCHAR(50) NULL,
-    planeAlertDbTags TEXT[] CHECK (
-        cardinality(planeAlertDbTags) <= 3
+    plane_alert_db_category VARCHAR(50) NULL,
+    plane_alert_db_tags TEXT[] CHECK (
+        cardinality(plane_alert_db_tags) <= 3
     )
 );
 -- +goose StatementEnd

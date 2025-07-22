@@ -14,6 +14,7 @@ import (
 	"syscall"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/joho/godotenv"
 	"github.com/nats-io/nats.go"
 )
@@ -83,6 +84,13 @@ func main() {
 		}
 
 		log.Printf("Processing aircraft: %s\n", aircraft.IcaoHexCode)
+
+		err = queries.CreateAircraft(ctx, marshallAircraftForPostgres(aircraft))
+		if err != nil {
+			log.Printf("Error creating aircraft in database: %v", err)
+			return
+		}
+		log.Printf("Aircraft %s successfully created in the database", aircraft.IcaoHexCode)
 	})
 
 	// Catch interrupt signal to gracefully shutdown
@@ -146,4 +154,24 @@ func loadConfig() (Config, error) {
 	}
 
 	return config, nil
+}
+
+func marshallAircraftForPostgres(aircraft data.EnrichedAircraft) pg.CreateAircraftParams {
+	cmpg := aircraft.CMPG
+	if cmpg == "" {
+		cmpg = string(pg.CmpgUnknown)
+	}
+
+	return pg.CreateAircraftParams{
+		IcaoHexCode: aircraft.IcaoHexCode,
+		Registration: pgtype.Text{String: aircraft.Registration, Valid: true},
+		Manufacturer: pgtype.Text{String: aircraft.Manufacturer, Valid: true},
+		IcaoTypeCode: pgtype.Text{String: aircraft.IcaoTypeCode, Valid: true},
+		AircraftType: pgtype.Text{String: aircraft.AircraftType, Valid: true},
+		RegisteredOwners: pgtype.Text{String: aircraft.RegisteredOwners, Valid: true},
+		IcaoAirlineCode: pgtype.Text{String: aircraft.IcaoAirlineCode, Valid: true},
+		Cmpg: pg.Cmpg(cmpg),
+		PlaneAlertDbCategory: pgtype.Text{String: aircraft.PlaneAlertDbCategory, Valid: true},
+		PlaneAlertDbTags: aircraft.PlaneAlertDbTags,
+	}
 }

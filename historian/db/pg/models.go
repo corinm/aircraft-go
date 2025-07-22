@@ -65,6 +65,6 @@ type Aircraft struct {
 	RegisteredOwners     pgtype.Text
 	IcaoAirlineCode      pgtype.Text
 	Cmpg                 Cmpg
-	Planealertdbcategory pgtype.Text
-	Planealertdbtags     []string
+	PlaneAlertDbCategory pgtype.Text
+	PlaneAlertDbTags     []string
 }

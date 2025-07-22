@@ -7,6 +7,11 @@ vars:
 
 # This is a list of `pipelines` that DevSpace can execute (you can define your own)
 pipelines:
+  migrate-db:
+    run: |-
+      build_images --all -t $(git describe --always)
+      kubectl run goose-migrate --restart=Never --image=${MIGRATIONS_IMAGE} --namespace=aircraft -- goose up
+
   # This is the pipeline for the main command: `devspace dev` (or `devspace run-pipeline dev`)
   dev:
     run: |-
@@ -46,6 +51,15 @@ deployments:
       values:
         containers:
           - image: ${IMAGE}
+        initContainers:
+          # - name: goose-migrate-down
+          #   image: ${MIGRATIONS_IMAGE}
+          #   command: ["goose", "down-to", "0"]
+          #   imageSelector: ${MIGRATIONS_IMAGE}
+          - name: goose-migrate-up
+            image: ${MIGRATIONS_IMAGE}
+            command: ["goose", "up"]
+            imageSelector: ${MIGRATIONS_IMAGE}
 
   # aircraft-goose-migrations:
   #   helm:
@@ -53,8 +67,18 @@ deployments:
   #       name: component-chart
   #       repo: https://charts.devspace.sh
   #     values:
-  #       containers:
-  #         - image: ${MIGRATIONS_IMAGE}
+  #       initContainers:
+  #         - name: goose-migrate
+  #           image: ${MIGRATIONS_IMAGE}
+  #           command: ["goose", "up"]
+  #           imageSelector: ${MIGRATIONS_IMAGE}
+    # helm:
+    #   chart:
+    #     name: component-chart
+    #     repo: https://charts.devspace.sh
+    #   values:
+    #     containers:
+    #       - image: ${MIGRATIONS_IMAGE}
 
 # This is a list of `dev` containers that are based on the containers created by your deployments
 dev:
@@ -83,15 +107,15 @@ dev:
       - port: "2349"
 
 # hooks:
-# - name: Run Goose migrations
-#   command: |
-#     kubectl run goose-migrate --rm --restart=Never --image=your-goose-image --namespace=aircraft -- goose up
-#   container:
-#     imageSelector: ${MIGRATIONS_IMAGE} # From goose.Dockerfile
-#   events: ["before:deploy"]
 # - name: Build Goose image
 #   command: |
-#     devspace build --images aircraft-historian-goose
+#     devspace build
+#   events: ["before:deploy"]
+# - name: Run Goose migrations
+#   command: |
+#     kubectl run goose-migrate --restart=Never --image=${MIGRATIONS_IMAGE} --namespace=aircraft -- goose up
+#   container:
+#     imageSelector: ${MIGRATIONS_IMAGE} # From goose.Dockerfile
 #   events: ["before:deploy"]
 
 # Use the `commands` section to define repeatable dev workflows for this project 
