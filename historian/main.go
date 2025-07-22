@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"historian/data"
 	"historian/db/pg"
 	"historian/messaging"
 	"log"
@@ -59,13 +61,28 @@ func main() {
 	}
 
 	log.Printf("Found %d aircraft in the database", len(aircraft))
-
+	
 	m.Subscribe("aircraft.raw", func(msg *nats.Msg) {
 		log.Println("Received message on subject:", msg.Subject)
+		log.Printf("Message data: %s\n", string(msg.Data))
+		
+		aircraft := data.RawAircraft{IcaoHexCode: string(msg.Data)}
+		
+		log.Printf("Processing aircraft: %s\n", aircraft.IcaoHexCode)
 	})
-
+	
 	m.Subscribe("aircraft.enriched", func(msg *nats.Msg) {
 		log.Println("Received message on subject:", msg.Subject)
+		log.Printf("Message data: %s\n", string(msg.Data))
+
+		aircraft := data.EnrichedAircraft{}
+		err := json.Unmarshal(msg.Data, &aircraft)
+		if err != nil {
+			log.Println("Error unmarshalling aircraft data:", err)
+			return
+		}
+
+		log.Printf("Processing aircraft: %s\n", aircraft.IcaoHexCode)
 	})
 
 	// Catch interrupt signal to gracefully shutdown

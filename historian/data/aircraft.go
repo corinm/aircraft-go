@@ -1,5 +1,9 @@
 package data
 
+type RawAircraft struct {
+	IcaoHexCode      string // e.g. "4CA293"
+}
+
 type EnrichedAircraft struct {
 	IcaoHexCode          string   `json:"icaoHexCode"`          // e.g. "4CA293"
 
