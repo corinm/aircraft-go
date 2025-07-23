@@ -32,7 +32,7 @@ Combines local ADS-B data with other data sources and notifies about interesting
 - [x] Implement `notifier` service
   - [x] Publish notifications using Pushover
 - [x] Add Postgres
-- [ ] Add `historian` service
+- [x] Add `historian` service
 - [ ] Add `stats` service
 - [ ] Add a `monitoring` service to keep track of enrichment failures (could use this to compare sources and find backup enrichers for when one source doesn't have any details)
 - [ ] Other / refactoring / future
