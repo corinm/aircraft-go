@@ -12,8 +12,8 @@ import (
 
 type Config struct {
 	Tar1090Url 	      string `env:"TAR1090_URL"`
-	DiscoveryNatsHost string `env:"DISCOVERY_NATS_HOST"`
-	DiscoveryNatsPort string `env:"DISCOVERY_NATS_PORT"`
+	NatsHost string `env:"AIRCRAFT_NATS_HOST"`
+	NatsPort string `env:"AIRCRAFT_NATS_PORT"`
 }
 
 func main() {
@@ -32,7 +32,7 @@ func main() {
 		panic(err)
 	}
 
-	natsUrl := config.DiscoveryNatsHost + ":" + config.DiscoveryNatsPort
+	natsUrl := config.NatsHost + ":" + config.NatsPort
 
 	f := fetcher.Tar1090AdsbFetcher{
 		URL: config.Tar1090Url,

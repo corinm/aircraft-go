@@ -16,8 +16,8 @@ import (
 )
 
 type Config struct {
-	DiscoveryNatsHost string `env:"DISCOVERY_NATS_HOST"`
-	DiscoveryNatsPort string `env:"DISCOVERY_NATS_PORT"`
+	NatsHost string `env:"AIRCRAFT_NATS_HOST"`
+	NatsPort string `env:"AIRCRAFT_NATS_PORT"`
 }
 
 func main() {
@@ -36,7 +36,7 @@ func main() {
 		panic(err)
 	}
 
-	natsUrl := config.DiscoveryNatsHost + ":" + config.DiscoveryNatsPort
+	natsUrl := config.NatsHost + ":" + config.NatsPort
 
 	log.Printf("Connecting to NATS at %s...\n", natsUrl)
 	m, err := messaging.NewNatsMessaging(natsUrl)
