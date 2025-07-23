@@ -13,14 +13,28 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/caarlos0/env/v11"
 	"github.com/lpernett/godotenv"
 	"github.com/nats-io/nats.go"
 )
 
+type Config struct {
+	DiscoveryNatsHost string `env:"DISCOVERY_NATS_HOST"`
+	DiscoveryNatsPort string `env:"DISCOVERY_NATS_PORT"`
+	HexDbUrl          string `env:"HEXDB_URL"`
+}
+
 func main() {
 	log.Println("Enricher starting...")
 
-	config, err := loadConfig()
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("failed to load .env file: %w", err)
+		panic(err)
+	}
+
+	var config Config
+	err := env.Parse(&config)
+	
 	if err != nil {
 		log.Fatal("Error loading configuration:", err)
 		panic(err)
@@ -86,33 +100,4 @@ func main() {
     <-sigChan // blocks until a signal is received
     fmt.Println("Shutting down gracefully...")
     m.Drain()
-}
-
-type Config struct {
-	DiscoveryNatsHost string `env:"DISCOVERY_NATS_HOST"`
-	DiscoveryNatsPort string `env:"DISCOVERY_NATS_PORT"`
-	HexDbUrl          string `env:"HEXDB_URL"`
-}
-
-func loadConfig() (Config, error) {
-	if err := godotenv.Load(); err != nil {
-		return Config{}, fmt.Errorf("failed to load .env file: %w", err)
-	}
-
-	var config Config
-
-	config.DiscoveryNatsHost = os.Getenv("DISCOVERY_NATS_HOST")
-	if config.DiscoveryNatsHost == "" {
-		return Config{}, fmt.Errorf("DISCOVERY_NATS_HOST environment variable is not set")
-	}
-	config.DiscoveryNatsPort = os.Getenv("DISCOVERY_NATS_PORT")
-	if config.DiscoveryNatsPort == "" {
-		return Config{}, fmt.Errorf("DISCOVERY_NATS_PORT environment variable is not set")
-	}
-	config.HexDbUrl = os.Getenv("HEXDB_URL")
-	if config.HexDbUrl == "" {
-		return Config{}, fmt.Errorf("HEXDB_URL environment variable is not set")
-	}
-	
-	return config, nil
 }
