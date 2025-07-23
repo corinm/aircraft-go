@@ -2,44 +2,40 @@ package main
 
 import (
 	"log"
-	"os"
 	"time"
 
+	"github.com/caarlos0/env/v11"
 	"github.com/corinm/aircraft/discovery/fetcher"
 	"github.com/corinm/aircraft/discovery/messaging"
 	"github.com/lpernett/godotenv"
 )
 
+type Config struct {
+	Tar1090Url 	      string `env:"TAR1090_URL"`
+	NatsHost string `env:"AIRCRAFT_NATS_HOST"`
+	NatsPort string `env:"AIRCRAFT_NATS_PORT"`
+}
+
 func main() {
 	log.Println("Discoverer starting...")
 
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("Failed to load .env file")
-		panic("Error loading .env file")
+		log.Fatal("failed to load .env file: %w", err)
+		panic(err)
 	}
 
-	tar1090Url := os.Getenv("TAR1090_URL")
-	if tar1090Url == "" {
-		log.Fatal("TAR1090_URL environment variable is not set")
-		panic("TAR1090_URL not set")
-	}
-
-	natsHost := os.Getenv("DISCOVERY_NATS_HOST")
-	if natsHost == "" {
-		log.Fatal("DISCOVERY_NATS_HOST environment variable is not set")
-		panic("DISCOVERY_NATS_HOST not set")
-	}
+	var config Config
+	err := env.Parse(&config)
 	
-	natsPort := os.Getenv("DISCOVERY_NATS_PORT")
-	if natsPort == "" {
-		log.Fatal("DISCOVERY_NATS_PORT environment variable is not set")
-		panic("DISCOVERY_NATS_PORT not set")
+	if err != nil {
+		log.Fatal("Error loading configuration:", err)
+		panic(err)
 	}
 
-	natsUrl := natsHost + ":" + natsPort
+	natsUrl := config.NatsHost + ":" + config.NatsPort
 
 	f := fetcher.Tar1090AdsbFetcher{
-		URL: tar1090Url,
+		URL: config.Tar1090Url,
 	}
 
 	log.Printf("Connecting to NATS at %s...\n", natsUrl)

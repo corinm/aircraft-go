@@ -10,44 +10,36 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/caarlos0/env/v11"
 	"github.com/gregdel/pushover"
-	"github.com/joho/godotenv"
+	"github.com/lpernett/godotenv"
 	"github.com/nats-io/nats.go"
 )
+
+type Config struct {
+	NatsHost string `env:"AIRCRAFT_NATS_HOST"`
+	NatsPort string `env:"AIRCRAFT_NATS_PORT"`
+	PushoverAppToken string `env:"PUSHOVER_APP_TOKEN"`
+	PushoverUserKey string `env:"PUSHOVER_USER_KEY"`
+}
 
 func main() {
 	log.Print("Notifier service is starting...")
 
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("Failed to load .env file")
-		panic("Error loading .env file")
+		log.Fatal("failed to load .env file: %w", err)
+		panic(err)
 	}
 
-	natsHost := os.Getenv("AIRCRAFT_NATS_HOST")
-	if natsHost == "" {
-		log.Fatal("AIRCRAFT_NATS_HOST environment variable is not set")
-		panic("AIRCRAFT_NATS_HOST not set")
-	}
-	
-	natsPort := os.Getenv("AIRCRAFT_NATS_PORT")
-	if natsPort == "" {
-		log.Fatal("AIRCRAFT_NATS_PORT environment variable is not set")
-		panic("AIRCRAFT_NATS_PORT not set")
+	var config Config
+	err := env.Parse(&config)
+
+	if err != nil {
+		log.Fatal("Error loading configuration:", err)
+		panic(err)
 	}
 
-	natsUrl := natsHost + ":" + natsPort
-
-	pushoverAppToken := os.Getenv("PUSHOVER_APP_TOKEN")
-	if pushoverAppToken == "" {
-		log.Fatal("PUSHOVER_APP_TOKEN environment variable is not set")
-		panic("PUSHOVER_APP_TOKEN not set")
-	}
-
-	pushoverUserKey := os.Getenv("PUSHOVER_USER_KEY")
-	if pushoverUserKey == "" {
-		log.Fatal("PUSHOVER_USER_KEY environment variable is not set")
-		panic("PUSHOVER_USER_KEY not set")
-	}
+	natsUrl := config.NatsHost + ":" + config.NatsPort
 
 	log.Printf("Connecting to NATS at %s...\n", natsUrl)
 	m, err := messaging.NewNatsMessaging(natsUrl)
@@ -58,8 +50,8 @@ func main() {
 	defer m.Close()
 	log.Println("Connected to NATS")
 
-	p := pushover.New(pushoverAppToken)
-	recipient := pushover.NewRecipient(pushoverUserKey)
+	p := pushover.New(config.PushoverAppToken)
+	recipient := pushover.NewRecipient(config.PushoverUserKey)
 
 	m.Subscribe("aircraft.interesting", func(msg *nats.Msg) {
 		log.Println("Received message on subject:", msg.Subject)
