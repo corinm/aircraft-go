@@ -3,7 +3,8 @@ module evaluator
 go 1.23.1
 
 require (
-	github.com/joho/godotenv v1.5.1
+	github.com/caarlos0/env/v11 v11.3.1
+	github.com/lpernett/godotenv v0.0.0-20230527005122-0de1d4c5ef5e
 	github.com/nats-io/nats.go v1.43.0
 )
 
