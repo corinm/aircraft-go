@@ -10,21 +10,38 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 
+	"github.com/caarlos0/env/v11"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/joho/godotenv"
+	"github.com/lpernett/godotenv"
 	"github.com/nats-io/nats.go"
 )
+
+type Config struct {
+	DiscoveryNatsHost string `env:"DISCOVERY_NATS_HOST"`
+	DiscoveryNatsPort string `env:"DISCOVERY_NATS_PORT"`
+	PostgresHost      string `env:"POSTGRES_HOST"`
+	PostgresPort      uint16 `env:"POSTGRES_PORT"`
+	PostgresUser      string `env:"POSTGRES_USER"`
+	PostgresPassword  string `env:"POSTGRES_PASSWORD"`
+	PostgresDB        string `env:"POSTGRES_DB"`
+}
 
 func main() {
 	log.Println("Historian starting...")
 
-	config, err := loadConfig()
+	if err := godotenv.Load(); err != nil {
+		log.Fatalln("failed to load .env file:", err)
+		panic(err)
+	}
+
+	var config Config
+	err := env.Parse(&config)
+	
 	if err != nil {
-		log.Fatal("Error loading configuration:", err)
+		log.Fatalln("Error loading configuration:", err)
 		panic(err)
 	}
 
@@ -100,60 +117,6 @@ func main() {
 	<-sigChan // blocks until a signal is received
 	fmt.Println("Shutting down gracefully...")
 	m.Drain()
-}
-
-type Config struct {
-	DiscoveryNatsHost string `env:"DISCOVERY_NATS_HOST"`
-	DiscoveryNatsPort string `env:"DISCOVERY_NATS_PORT"`
-	PostgresHost      string `env:"POSTGRES_HOST"`
-	PostgresPort      uint16 `env:"POSTGRES_PORT"`
-	PostgresUser      string `env:"POSTGRES_USER"`
-	PostgresPassword  string `env:"POSTGRES_PASSWORD"`
-	PostgresDB        string `env:"POSTGRES_DB"`
-}
-
-func loadConfig() (Config, error) {
-	if err := godotenv.Load(); err != nil {
-		return Config{}, fmt.Errorf("failed to load .env file: %w", err)
-	}
-
-	var config Config
-
-	config.DiscoveryNatsHost = os.Getenv("DISCOVERY_NATS_HOST")
-	if config.DiscoveryNatsHost == "" {
-		return Config{}, fmt.Errorf("DISCOVERY_NATS_HOST environment variable is not set")
-	}
-	config.DiscoveryNatsPort = os.Getenv("DISCOVERY_NATS_PORT")
-	if config.DiscoveryNatsPort == "" {
-		return Config{}, fmt.Errorf("DISCOVERY_NATS_PORT environment variable is not set")
-	}
-	config.PostgresHost = os.Getenv("POSTGRES_HOST")
-	if config.PostgresHost == "" {
-		return Config{}, fmt.Errorf("POSTGRES_HOST environment variable is not set")
-	}
-	postgresPortStr := os.Getenv("POSTGRES_PORT")
-	if postgresPortStr == "" {
-		return Config{}, fmt.Errorf("POSTGRES_PORT environment variable is not set")
-	}
-	postgresPortNum, err := strconv.ParseUint(postgresPortStr, 10, 16)
-	if err != nil {
-		return Config{}, fmt.Errorf("POSTGRES_PORT environment variable is not a valid uint16: %w", err)
-	}
-	config.PostgresPort = uint16(postgresPortNum)	
-	config.PostgresUser = os.Getenv("POSTGRES_USER")
-	if config.PostgresUser == "" {
-		return Config{}, fmt.Errorf("POSTGRES_USER environment variable is not set")
-	}
-	config.PostgresPassword = os.Getenv("POSTGRES_PASSWORD")
-	if config.PostgresPassword == "" {
-		return Config{}, fmt.Errorf("POSTGRES_PASSWORD environment variable is not set")
-	}
-	config.PostgresDB = os.Getenv("POSTGRES_DB")
-	if config.PostgresDB == "" {
-		return Config{}, fmt.Errorf("POSTGRES_DB environment variable is not set")
-	}
-
-	return config, nil
 }
 
 func marshallAircraftForPostgres(aircraft data.EnrichedAircraft) pg.CreateAircraftParams {
