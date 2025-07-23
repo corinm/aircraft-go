@@ -78,5 +78,4 @@ commands:
 
 # Define dependencies to other projects with a devspace.yaml
 # dependencies:
-#   aircraft-enricher:
-#     path: ../enricher
+
