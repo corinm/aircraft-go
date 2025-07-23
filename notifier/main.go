@@ -11,7 +11,7 @@ import (
 	"syscall"
 
 	"github.com/gregdel/pushover"
-	"github.com/joho/godotenv"
+	"github.com/lpernett/godotenv"
 	"github.com/nats-io/nats.go"
 )
 
