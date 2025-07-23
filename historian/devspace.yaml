@@ -1,18 +1,20 @@
 version: v2beta1
-name: aircraft-discoverer
+name: aircraft-historian
 
 vars:
-  IMAGE: aircraft-discoverer
+  IMAGE: aircraft-historian
+  MIGRATIONS_IMAGE: aircraft-historian-goose
 
 # This is a list of `pipelines` that DevSpace can execute (you can define your own)
 pipelines:
   # This is the pipeline for the main command: `devspace dev` (or `devspace run-pipeline dev`)
   dev:
     run: |-
-      run_dependencies --all         # 1. Deploy any projects this project needs (see "dependencies")
-      ensure_pull_secrets --all      # 2. Ensure pull secrets
-      create_deployments --all       # 3. Deploy Helm charts and manifests specfied as "deployments"
-      start_dev aircraft-discoverer  # 4. Start dev mode "app" (see "dev" section)
+      run_dependencies --all        # 1. Deploy any projects this project needs (see "dependencies")
+      ensure_pull_secrets --all     # 2. Ensure pull secrets
+      build_images ${MIGRATIONS_IMAGE} -t $(git describe --always)  # 3. Build, tag (git commit hash) and push the migrations image
+      create_deployments --all      # 3. Deploy Helm charts and manifests specfied as "deployments"
+      start_dev aircraft-historian  # 4. Start dev mode "app" (see "dev" section)
   # You can run this pipeline via `devspace deploy` (or `devspace run-pipeline deploy`)
   deploy:
     run: |-
@@ -24,13 +26,16 @@ pipelines:
 # This is a list of `images` that DevSpace can build for this project
 # We recommend to skip image building during development (devspace dev) as much as possible
 images:
-  aircraft-discoverer:
+  aircraft-historian:
     image: ${IMAGE}
     dockerfile: ./Dockerfile
+  aircraft-historian-goose:
+    image: ${MIGRATIONS_IMAGE}
+    dockerfile: ./goose.Dockerfile
 
 # This is a list of `deployments` that DevSpace can create for this project
 deployments:
-  aircraft-discoverer:
+  aircraft-historian:
     # This deployment uses `helm` but you can also define `kubectl` deployments or kustomizations
     helm:
       # We are deploying this project with the Helm chart you provided
@@ -42,10 +47,19 @@ deployments:
       values:
         containers:
           - image: ${IMAGE}
+        initContainers:
+          # - name: goose-migrate-down
+          #   image: ${MIGRATIONS_IMAGE}
+          #   command: ["goose", "down-to", "0"]
+          #   imageSelector: ${MIGRATIONS_IMAGE}
+          - name: goose-migrate-up
+            image: ${MIGRATIONS_IMAGE}
+            command: ["goose", "up"]
+            imageSelector: ${MIGRATIONS_IMAGE}
 
 # This is a list of `dev` containers that are based on the containers created by your deployments
 dev:
-  aircraft-discoverer:
+  aircraft-historian:
     # Search for the container that runs this image
     imageSelector: ${IMAGE}
     # Replace the container image with this dev-optimized image (allows to skip image building during development)
@@ -67,7 +81,7 @@ dev:
       - gitCredentials: true
     # Forward the following ports to be able access your application via localhost
     ports:
-      - port: "2345"
+      - port: "2349"
 
 # Use the `commands` section to define repeatable dev workflows for this project 
 commands:
@@ -77,5 +91,13 @@ commands:
       echo 'Anyone using this project can invoke it via "devspace run migrate-db"'
 
 # Define dependencies to other projects with a devspace.yaml
-# dependencies:
-
+dependencies:
+  aircraft-discoverer:
+    path: ../discoverer
+  aircraft-enricher:
+    path: ../enricher
+#   api:
+#     git: https://...  # Git-based dependencies
+#     tag: v1.0.0
+#   ui:
+#     path: ./ui        # Path-based dependencies (for monorepos)

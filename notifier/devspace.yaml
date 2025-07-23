@@ -65,6 +65,9 @@ dev:
       - command: kubectl
       - command: helm
       - gitCredentials: true
+    # Forward the following ports to be able access your application via localhost
+    ports:
+      - port: "2348"
 
 # Use the `commands` section to define repeatable dev workflows for this project 
 commands:

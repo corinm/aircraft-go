@@ -110,7 +110,7 @@ func (e *PlaneAlertDbEnricher) Enrich(ctx context.Context, a *data.EnrichedAircr
 		case "Gov":
 			a.CMPG = "Government"
 		default:
-			a.CMPG = "Unknown"
+			a.CMPG = "Unknown" // "Unknown" or ""?
 		}
 	}
 

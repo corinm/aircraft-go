@@ -31,8 +31,8 @@ Combines local ADS-B data with other data sources and notifies about interesting
   - [x] Implement logic to identify interesting aircraft
 - [x] Implement `notifier` service
   - [x] Publish notifications using Pushover
-- [ ] Add Postgres
-- [ ] Add `historian` service
+- [x] Add Postgres
+- [x] Add `historian` service
 - [ ] Add `stats` service
 - [ ] Add a `monitoring` service to keep track of enrichment failures (could use this to compare sources and find backup enrichers for when one source doesn't have any details)
 - [ ] Other / refactoring / future
@@ -45,6 +45,7 @@ Combines local ADS-B data with other data sources and notifies about interesting
 
 ### Pre-requisites
 
+- A tar1090 API endpoint available e.g. by running [Readsb](https://github.com/wiedehopf/readsb) on your local network
 - A Kubernetes (K8s) cluster
 - [kubectl](https://kubernetes.io/docs/tasks/tools/) or your preferred K8s tool
 - A K8s namespace of your choosing e.g. `aircraft`
@@ -58,7 +59,26 @@ Combines local ADS-B data with other data sources and notifies about interesting
   helm repo update
   helm install my-nats nats/nats
   ```
-- A tar1090 API endpoint available e.g. by running [Readsb](https://github.com/wiedehopf/readsb) on your local network
+- Install Postgres Operator into your K8s cluster
+  ```bash
+  helm repo add cnpg https://cloudnative-pg.github.io/charts
+  helm upgrade --install cnpg \
+    --namespace cnpg-system \
+    --create-namespace \
+    cnpg/cloudnative-pg
+  ```
+- Setup Postgres
+  ```bash
+  kubectl create secret generic postgres-historian-password-secret \
+  --from-literal=username=historian \
+  --from-literal=password=password \
+  -n aircraft
+  kubectl apply -f ./infrastructure/cnpg-cluster.yaml
+  ```
+- Generate any generated code
+  ```bash
+  make generate
+  ```
 
 #### My ADS-B setup
 
