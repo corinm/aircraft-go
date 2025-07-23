@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"enricher/data"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -66,6 +67,11 @@ func (e *HexDbEnricher) Enrich(ctx context.Context, a *data.EnrichedAircraft) er
 	a.AircraftType = resp.Type
 	a.RegisteredOwners = resp.RegisteredOwners
 	a.IcaoAirlineCode = resp.OperatorFlagCode
+	// HexDB sometimes provides longer, invalid flag codes that appear to actually be type codes
+	if len(a.IcaoAirlineCode) > 3 {
+		log.Printf("Warning: IcaoAirlineCode for %s is longer than 3 characters: %s", a.IcaoHexCode, a.IcaoAirlineCode)
+		a.IcaoAirlineCode = ""
+	}
 
 	return nil
 }
