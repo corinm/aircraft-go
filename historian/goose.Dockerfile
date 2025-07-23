@@ -13,7 +13,7 @@ COPY --from=builder /go/bin/goose /usr/local/bin/goose
 
 WORKDIR /migrations
 
-COPY ./data/sql/migrations ./
+COPY ./db/sql/migrations ./
 COPY .env ./
 
 ENTRYPOINT ["goose", "up"]

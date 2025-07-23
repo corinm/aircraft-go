@@ -4,4 +4,4 @@ unit-tests:
 	cd enricher && go test -v ./...
 
 generate:
-	cd historian && rm -rf ./db/pg/* && sqlc generate
+	cd historian && rm -rf ./db/sql/generated/* && sqlc generate

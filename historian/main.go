@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"historian/data"
-	"historian/db/pg"
+	pg "historian/db/sql/generated"
 	"historian/messaging"
 	"log"
 	"os"
